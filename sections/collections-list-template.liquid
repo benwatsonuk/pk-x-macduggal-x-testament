@@ -1,0 +1,140 @@
+<section class="collection__list-section" data-section-id="{{ section.id }}" data-section-type="collection-list">
+
+  {% if section.settings.image != blank %}
+    <div class="collection-banner">
+      {% render 'basic-responsive-image', type: section.settings.image, data_widths: '[180, 360, 540, 720, 900, 1080, 1296, 1512]' %}
+      <noscript>
+        <img src="{{ section.settings.image | img_url: '1024x' }}" alt="{{ section.settings.image.alt }}">
+      </noscript>
+    </div>
+  {% endif %}
+
+  <div class="collection__list-container row" id="content">
+    {% if settings.breadcrumb %}{% render 'breadcrumb' %}{% endif %}
+    <div class="collection__list-description{% if section.settings.center_align %} center{% endif %} collection-description desktop-12 tablet-6 mobile-3">
+      <h1 class="page-title">{{ 'collections.general.all_collections' | t }}</h1>
+      {% if section.settings.text != blank %}
+      {{ section.settings.text }}
+      {% endif %}
+    </div>
+    <div class="clear"></div>
+      {% paginate collections by 48 %}
+      {% if collections.size > 0 %}
+        <div class="collection__list-loop">
+          {% if section.settings.title_position == 'floating' %}{% assign is_floating = true %}{% endif %}
+          {% for collection in collections %}
+          <div class="collection__list-item{% if is_floating %} floating__title{% endif %}" data-alpha="{{ collection.title }}" {{ block.shopify_attributes }}>
+            {% render 'collection-grid-item', collection: collection %}
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>{{ 'collections.general.no_matches' | t }}</p>
+      {% endif %}
+      {% if collections.size > 48 %}
+      {% render 'pagination', paginate: paginate %}
+      {% endif %}
+      {% endpaginate %}
+  </div>
+
+  {%- assign grid = section.settings.grid -%}
+  {% case section.settings.grid %}
+  {% when 2 %}
+  {%- assign prod_grid = 50 -%}
+  {% when 3 %}
+  {%- assign prod_grid = 33.333 -%}
+  {% when 4 %}
+  {%- assign prod_grid = 25 -%}
+  {% endcase %}
+
+  <style>
+    .collection__list-loop {
+      grid-template-columns: repeat({{ grid }}, 1fr);
+    }
+    .collection-banner {
+      height: {{ section.settings.banner_height }}px;
+      overflow: hidden;
+    }
+    .collection-banner .box-ratio {
+      padding-bottom: {{ section.settings.banner_height }}px !important;
+    }
+    .collection-banner img {
+      object-fit: cover;
+      object-position: center center;
+      height: {{ section.settings.banner_height }}px;
+    }
+  </style>
+</section>
+
+{% schema %}
+  {
+    "name": "Collections list",
+    "settings": [
+      {
+         "type": "header",
+         "content": "Content"
+      },
+      {
+        "type": "image_picker",
+        "id": "image",
+        "label": "Image",
+        "info" : "1800px x 800px recommended"        
+      },
+      {
+       "type":    "range",
+       "id":      "banner_height",
+       "min":     200,
+       "max":     700,
+       "step":    50,
+       "unit":    "px",
+       "label":   "Image height",
+       "default": 400
+      },
+      {
+        "id": "text",
+        "type": "richtext",
+        "label": "Description",
+        "default": "<p>Add some descriptive text to your all collections page.</p>"
+      },
+      {
+        "type": "checkbox",
+        "id": "center_align",
+        "label": "Center description",
+        "default":true
+      },
+      {
+         "type": "header",
+         "content": "Collection grid"
+      },
+      {
+        "type":      "range",
+        "id":        "grid",
+        "min":       2,
+        "max":       4,
+        "step":      1,
+        "label":     "Collections per row",
+        "default":   3
+      },
+      {
+        "type": "select",
+        "id": "title_position",
+        "label": "Collection title position",
+        "options": [
+          {
+            "value": "below",
+            "label": "Below image"
+          },
+          {
+            "value": "floating",
+            "label": "Floating on image"
+          }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "collection_count",
+        "label": "Show product count"
+      }
+    ]
+  }
+{% endschema %}

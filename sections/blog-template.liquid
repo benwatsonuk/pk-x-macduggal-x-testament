@@ -1,0 +1,136 @@
+<section id="page" class="blog__section" data-section-id="{{ section.id }}" data-section-type="blog-section">
+  {% if section.settings.image != blank %}
+    <div class="collection-banner">
+      {% render 'basic-responsive-image',
+        type: section.settings.image
+        data_widths: '[180, 360, 540, 720, 900, 1080, 1296, 1512]' %}
+      <noscript>
+        <img src="{{ section.settings.image | img_url: '1024x' }}" alt="{{ section.settings.image.alt }}">
+      </noscript>
+    </div>
+  {% endif %}
+
+  <div id="content" class="row">
+    {% if settings.breadcrumb %}
+      {% render 'breadcrumb' %}
+    {% endif %}
+    <h1 class="page-title blog__section-title">
+      {% if current_tags %}
+        {{ blog.title | link_to: blog.url }} / {{ current_tags.first }}
+      {% else %}
+        {{ blog.title }}
+      {% endif %}
+    </h1>
+
+    {% if section.settings.text != blank %}
+    <div class="blog__section-description desktop-12 tablet-6 mobile-3{% if section.settings.center_align %} center{% endif %}">
+      {{ section.settings.text }}
+    </div>
+    <div class="clear"></div>
+    {% endif %}
+
+    {%- assign count = section.settings.count -%}
+    {%- assign grid = section.settings.grid -%}
+    {% paginate blog.articles by count %}
+    <div class="blog__wrapper">
+      <div class="blog__article-container{% if grid == 1 %} list-layout{% endif %}">
+        {% for article in blog.articles  %}
+          {% render 'article-loop', article: article, blog: blog %}
+        {% endfor %}
+      </div>
+    </div>
+    {% render 'pagination', paginate: paginate %}
+    {% endpaginate %}
+  </div>
+  <style>
+  .collection-banner {
+    height: {{ section.settings.banner_height }}px;
+    overflow: hidden;
+  }
+  .collection-banner .box-ratio {
+    padding-bottom: {{ section.settings.banner_height }}px !important;
+  }
+  .collection-banner img {
+    object-fit: cover;
+    object-position: center center;
+    height: {{ section.settings.banner_height }}px;
+  }
+  .blog__article-container {
+    grid-template-columns: repeat({{ grid }}, 1fr);
+  }
+  </style>
+</section>
+
+
+{% schema %}
+{
+  "name": "Blog page",
+  "settings": [
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image",
+      "info": "1800px x 800px recommended"
+    },
+    {
+      "type": "range",
+      "id": "banner_height",
+      "min": 200,
+      "max": 700,
+      "step": 50,
+      "unit": "px",
+      "label": "Image height",
+      "default": 400
+    },
+    {
+      "id": "text",
+      "type": "richtext",
+      "label": "Text",
+      "default": "<p>Add some descriptive text to your Blog page.</p>"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_align",
+      "label": "Center description",
+      "default": true
+    },
+    {
+      "type":"header",
+      "content":"Blog post options"
+    },
+    {
+      "type":      "range",
+      "id":        "grid",
+      "min":       1,
+      "max":       3,
+      "step":      1,
+      "label":     "posts per row",
+      "default":   3
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show published date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show author",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Show tags",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_button",
+      "label": "Show button",
+      "default": true
+    }
+  ]
+}
+{% endschema %}

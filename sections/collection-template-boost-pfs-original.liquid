@@ -1,0 +1,426 @@
+{%- liquid
+
+assign collection_link = ''
+
+if collection.handle
+  assign collection_link = '/collections/' | append: collection.handle
+elsif collection.products.first.type == collection.title
+  assign collection_link = collection.title | url_for_type
+elsif collection.products.first.vendor == collection.title
+  assign collection_link = collection.title | url_for_vendor
+endif
+
+  -%}
+<section class="collection__page" data-section-id="{{ section.id }}" data-section-type="collection-section" data-collection-link="{{ collection_link }}">
+  {% assign number = section.settings.products_per_page %}
+  {% paginate collection.products by number %}
+  <h1 class="colleciton__page-title page-title">
+    {% if collection.handle == 'all' %}{{ 'collections.general.all_products' | t }}{% else %}{{ collection.title }}{% endif %}
+  </h1>
+  {% if section.settings.description_position == 'top' %}
+  <div class="collection__page-description desktop-12 tablet-6 mobile-3">
+    <div class="rte">
+      {{ collection.description | remove: "[banner]" }}
+    </div>
+  </div>
+  {% endif %}
+  <div class="clear"></div>
+  {% for block in section.blocks %}
+  {% if block.type == 'banner' %}
+  <div class="collection__page-banner image__overlay-section desktop-12 tablet-6 mobile-3" {{ block.shopify_attributes }}>
+    {% if block.settings.link != blank and block.settings.banner_text == blank %}<a href="{{ block.settings.link }}">{% endif %}
+    <div class="image__overlay-container lazyload lazyload-fade" data-bgset="{% render 'bgset', image: block.settings.image %}" data-sizes="auto">
+      {%- if block.settings.image == blank -%}
+      <div class="onboard plax-placehold">
+        {{ 'lifestyle-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      </div>
+      {% endif %}
+      {% if block.settings.banner_text != blank %}
+        <div class="image__overlay-caption">
+          {{ block.settings.banner_text }}
+          {% if block.settings.button_text != blank and block.settings.link != blank %}
+          <div class="image__overlay-btn-wrapper">
+            <a href="{{ block.settings.link }}">{{ block.settings.button_text | escape }}</a>
+          </div>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+    {% if block.settings.link != blank and block.settings.banner_text == blank %}</a>{% endif %}
+  </div>
+  <style>
+  .collection__page-banner .image__overlay-caption {
+    text-align: {{ block.settings.text_align }};
+    top: {{ block.settings.caption_vertical }}%;
+    left: {{ block.settings.caption_horizontal }}%;
+    -webkit-transform: translate(-{{ block.settings.caption_horizontal }}%, -{{ block.settings.caption_vertical }}%);
+      -ms-transform: translate(-{{ block.settings.caption_horizontal }}%, -{{ block.settings.caption_vertical }}%);
+        -moz-transform: translate(-{{ block.settings.caption_horizontal }}%, -{{ block.settings.caption_vertical }}%);
+        -o-transform: translate(-{{ block.settings.caption_horizontal }}%, -{{ block.settings.caption_vertical }}%);
+        transform: translate(-{{ block.settings.caption_horizontal }}%, -{{ block.settings.caption_vertical }}%);
+  }
+  .collection__page-banner {
+    margin-bottom: 30px;
+  }
+  .collection__page-banner .image__overlay-container {
+    height: {{ block.settings.height }}px;
+    overflow: hidden;
+    margin-top: 0;
+  }
+  @media screen and (max-width: 740px) {
+    .collection__page-banner .image__overlay-container {
+      height: {{ block.settings.mobile_height }}px;
+    }
+  }
+  .collection__page-banner .image__overlay-caption p {
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};
+    margin-bottom: 0;
+  }
+  .collection__page-banner .image__overlay-caption a {
+    text-decoration: underline;
+  }
+  .collection__page-banner .image__overlay-caption .image__overlay-btn-wrapper a {
+    text-decoration: none;
+    color: {{ block.settings.button_color }};
+    background: {{ block.settings.button_background }};
+    border: 1px solid {{ block.settings.button_background }};
+  }
+  .collection__page-banner .image__overlay-caption .image__overlay-btn-wrapper a:hover {
+    color: {{ block.settings.button_background }};
+  }
+  .no-js .collection__page-banner .image__overlay-container {
+    background-image: url({{ block.settings.image | img_url: '1024x' }});
+    opacity: 1;
+  }
+  </style>
+  <div class="clear"></div>
+  {% endif %}
+  {% endfor %}
+  {% if section.settings.show_sidebar %}
+    {% render 'collection-sidebar', collection: collection %}
+  {% endif %}
+  <!-- End Sidebar -->
+  <div class="{% if section.settings.show_sidebar %}desktop-9 tablet-6{% else %}desktop-12 tablet-6{% endif %} mobile-3">
+    {% if section.settings.show_sidebar == false and section.blocks.size >= 1 %}
+      <div class="collection__page-filter">
+        {% for block in section.blocks %}
+        {% if block.type == 'filter' %}
+          <div class="filter" {{ block.shopify_attributes }}>
+            {% assign tags = block.settings.tags  | replace: ' ,', ',' | replace: ', ', ',' | split: ',' %}
+            <select class="styled-select coll-filter alpha">
+              <option value="">{{ block.settings.title | escape }}</option>
+              {% for tag in tags %}
+              {% if current_tags contains tag %}
+              <option value="{{ tag | handle }}" selected>{{ tag }}</option>
+              {% elsif collection.all_tags contains tag %}
+              <option value="{{ tag | handle }}">{{ tag }}</option>
+              {% endif %}
+              {% endfor %}
+            </select>
+          </div>
+        {% elsif block.type == 'sort' %}
+        <div class="filter" {{ block.shopify_attributes }}>
+          <select id="sort-by" class="styled-select">
+            {% for option in collection.sort_options %}
+                <option value="{{ option.value }}" {% if option.value == collection.sort_by %}selected{% endif %}>{{ option.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      <div class="clear"></div>
+    {% endif %}
+    <div class="collection__page-products product-loop">
+      {% for product in collection.products %}
+        <div id="product-listing-{{ product.id }}" class="collection__page-product product-index js-product-listing" data-alpha="{{ product.title }}" data-price="{{ product.price }}"  data-product-id="{{ product.id }}">
+          {% render 'product-listing', product: product, collection: collection %}
+        </div>
+      {% endfor %}
+    </div>
+    {% assign grid = section.settings.products_per_row %}
+    <style>
+      .collection__page-products {
+        grid-template-columns: repeat({{ grid }}, 1fr);
+      }
+    </style>
+  </div>
+  {% render 'pagination', paginate: paginate %}
+  {% endpaginate %}
+
+  {% if section.settings.description_position == 'bottom' %}
+  <div class="collection__page-description desktop-12 tablet-6 mobile-3 description__bottom">
+    <div class="rte">
+      {{ collection.description | remove: "[banner]" }}
+    </div>
+  </div>
+  {% endif %}
+
+</section>
+{% schema %}
+{
+  "name": "Collection page",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 2,
+      "max": 50,
+      "step": 1,
+      "label": "How many products per page",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "products_per_row",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "label": "Products per row",
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "default": true,
+      "label": "Show sidebar"
+    },
+    {
+      "type": "select",
+      "id": "description_position",
+      "label": "Description position",
+      "default":"top",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Menu title",
+          "default": "Explore"
+        },
+        {
+          "type": "link_list",
+          "id": "side_nav",
+          "default":"main-menu",
+          "label": "Sidebar menu",
+          "info": "This menu won't show dropdown items"
+        }
+      ]
+    },
+    {
+      "type": "vendor_list",
+      "name": "Vendor list",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "shop_by_designer_title",
+          "label": "Vendor list title",
+          "default": "Shop by Designer"
+        }
+      ]
+    },
+    {
+      "type": "filter",
+      "name": "Tag filter",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tag title",
+          "default": "Filter by"
+        },
+        {
+          "type": "textarea",
+          "id": "tags",
+          "label": "Tags to filter",
+          "info": "Add each tag for this filter, separated by a comma"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "id": "link",
+          "type": "url",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Rich text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Made for you"
+        },
+        {
+          "type": "richtext",
+          "id": "sidebar_text",
+          "label": "Text",
+          "default": "<p>Add some text to the sidebar</p>"
+        }
+      ]
+    },
+    {
+      "type": "sort",
+      "name": "Sort by",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tag title",
+          "default": "Sort by"
+        }
+      ]
+    },
+    {
+      "type": "banner",
+      "name": "Banner image",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Add a banner image above products to advertise a Sale or other content. Shown on all collection pages."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info" : "1400px width recommended"
+        },
+        {
+           "type":    "range",
+           "id":      "height",
+           "min":     100,
+           "max":     250,
+           "step":    10,
+           "unit":    "px",
+           "label":   "Image height",
+           "default": 150
+        },
+        {
+         "type":    "range",
+         "id":      "mobile_height",
+         "min":     100,
+         "max":     300,
+         "step":    10,
+         "unit":    "px",
+         "label":   "Image height (mobile)",
+         "default": 150
+        },
+        {
+          "id": "link",
+          "type": "url",
+          "label": "Link"
+        },
+        {
+          "type": "richtext",
+          "id": "banner_text",
+          "label": "Banner text",
+          "default": "<p>Banner overlay text</p>"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text",
+          "default": "Button"
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "label": "Text alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "caption_horizontal",
+          "min": 0,
+          "max": 100,
+          "step": 2,
+          "unit": "%",
+          "label": "Text horizontal position",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "caption_vertical",
+          "min": 0,
+          "max": 100,
+          "step": 2,
+          "unit": "%",
+          "label": "Text vertical position",
+          "default": 50
+        },
+        {
+          "type":      "range",
+          "id":        "text_size",
+          "min":       13,
+          "max":       26,
+          "step":      1,
+          "unit":      "px",
+          "label":     "Text size",
+          "default":   16
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#000"
+        },
+        {
+          "type": "color",
+          "id": "button_color",
+          "label": "Button text",
+          "default": "#fff"
+        },
+        {
+          "type": "color",
+          "id": "button_background",
+          "label": "Button background",
+          "default": "#000"
+        }
+      ]
+    }
+  ]
+}
+
+{% endschema %}

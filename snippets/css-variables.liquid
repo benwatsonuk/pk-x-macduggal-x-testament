@@ -1,0 +1,101 @@
+{% style %}
+{% assign main_font = settings.main_font %}
+{% assign heading_font = settings.heading_font %}
+{% assign nav_font = settings.nav_font %}
+  :root {
+    --main-family: {{ main_font.family }};
+    --main-weight: {{ main_font.weight }};
+    --font-size: {{ settings.font_size }}px;
+    --nav-size: {{ settings.nav_size }}px;
+    --heading-family: {{ heading_font.family }};
+    --heading-weight: {{ heading_font.weight }};
+    --h1-size: {{ settings.h1_size }}px;
+    --h2-size: {{ settings.h2_size }}px;
+    --h3-size: {{ settings.h3_size }}px;
+    --header-wrapper-background: {{ settings.header_wrapper_background }};
+    --background: {{ settings.background }};
+    --logo-color: {{ settings.logo_color }};
+    --header: {{ settings.header }};
+    --hello-color: {{ settings.hello_color }};
+    --header-icons: {{ settings.header_icons }};
+    --header-icons-hover: {{ settings.header_icons_hover }};
+    --mobile-header-icons: {{ settings.mobile_header_icons }};
+    --header-color: {{ settings.header_color }};
+    --text-color: {{ settings.text_color }};
+    --link-color: {{ settings.link_color }};
+    --sale-color: {{ settings.sale_color }};
+    --dotted-color: {{ settings.dotted_color }};
+    --button-color: {{ settings.button_color }};
+    --button-hover: {{ settings.button_hover }};
+    --button-text: {{ settings.button_text }};
+    --secondary-button-color: {{ settings.secondary_button_color }};
+    --secondary-button-hover: {{ settings.secondary_button_hover }};
+    --secondary-button-text: {{ settings.secondary_button_text }};
+    --direction-color: {{ settings.direction_color }};
+    --direction-background: {{ settings.direction_background }};
+    --direction-hover: {{ settings.direction_hover }};
+    --icons: {{ settings.icons }};
+    --icons-hover: {{ settings.icons_hover }};
+    --footer-border: {{ settings.footer_border }};
+    --footer-background: {{ settings.footer_background }};
+    --footer-text: {{ settings.footer_text }};
+    --footer-icons-color: {{ settings.footer_icons_color }};
+    --footer-icons-hover-color: {{ settings.footer_icons_hover_color }};
+    --footer-input: {{ settings.footer_input }};
+    --footer-input-text: {{ settings.footer_input_text }};
+    --footer-button: {{ settings.footer_button }};
+    --footer-button-text: {{ settings.footer_button_text }};
+    --nav-family: {{ nav_font.family }};
+    --nav-weight: {{ nav_font.weight }};
+    --nav-color: {{ settings.nav_color }};
+    --nav-hover-color: {{ settings.nav_hover_color }};
+    --nav-background-color: {{ settings.navigation }};
+    --nav-hover-link-color: {{ settings.nav_hover_link_color }};
+    --nav-border-color: {{ settings.nav_border_color }};
+    --dropdown-background-color: {{ settings.dropdown_background }};
+    --dropdown-link-color: {{ settings.dropdown_link_color }};
+    --dropdown-link-hover-color: {{ settings.dropdown_link_hover_color }};
+    --dropdown-min-width: 220px;
+    --free-shipping-bg: {{ settings.free_shipping_bg }};
+    --free-shipping-text: {{ settings.free_shipping_text }};
+    --error-color: {{ settings.error_color }};
+    --error-color-light: {{ settings.error_color | color_lighten: 50 }};
+    --swatch-height: 40px;
+    --swatch-width: 44px;
+    --tool-tip-width: {{ 44 | divided_by: 2 | minus: 50 | plus: 8 }};
+    --icon-border-color: {{ settings.text_color | color_lighten: 90 }};
+    --select-arrow-bg: url({{ 'select-arrow.png' | asset_url }});
+    --keyboard-focus-color: {{ settings.keyboard_focus }};
+    --keyboard-focus-border-style: {{ settings.focus_border_style }};
+    --keyboard-focus-border-weight: {{ settings.focus_border_weight }};
+    --price-unit-price: {{ settings.text_color | color_lighten: 60 }};
+    --color-filter-size: 30px;
+
+    {% if settings.button_corners == 'curved' %}
+      --button-corners: 3px;
+    {% else %}
+      --button-corners: 0;
+    {% endif %}
+
+  }
+  @media (max-width: 740px) {
+    :root {
+      --font-size: calc({{ settings.font_size }}px - ({{ settings.font_size }}px * 0.15));
+      --nav-size: calc({{ settings.nav_size }}px - ({{ settings.nav_size }}px * 0.15));
+      --h1-size: calc({{ settings.h1_size }}px - ({{ settings.h1_size }}px * 0.15));
+      --h2-size: calc({{ settings.h2_size }}px - ({{ settings.h2_size }}px * 0.15));
+      --h3-size: calc({{ settings.h3_size }}px - ({{ settings.h3_size }}px * 0.15));
+      --collection-item-image-height: 220px;
+    }
+  }
+  @media screen and (min-width: 741px) and (max-width: 1220px) {
+    :root {
+        --collection-item-image-height: 320px;
+    }
+  }
+  @media screen and (min-width: 1221px) {
+    :root {
+        --collection-item-image-height: 450px;
+    }
+  }
+{% endstyle %}

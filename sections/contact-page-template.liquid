@@ -1,0 +1,87 @@
+<section id="page" class="page__section" data-section-id="{{ section.id }}" data-section-type="page-section">
+
+  {% assign form_left = false %}
+  {% assign form_right = false %}
+  {% assign form_bottom = false %}
+
+  {% case section.settings.form_position %}
+  {% when 'left' %}
+  {% assign form_left = true %}
+  {% when 'right' %}
+  {% assign form_right = true %}
+  {% when 'bottom' %}
+  {% assign form_bottom = true %}
+  {% endcase %}
+
+  <h1 class="page-title page__section-title">{{ page.title }}</h1>
+  <div class="contactPage__section-content">
+    {% if form_left %}
+      <div class="contact__page-form">
+        {% render 'contact' %}
+      </div>
+    {% endif %}
+    <div class="rte">{{ page.content }}</div>
+    {% if form_right or form_bottom %}
+      <div class="contact__page-form">
+        {% render 'contact' %}
+      </div>
+    {% endif %}
+  </div>
+  <style>
+    @media screen and (min-width:741px) {
+      .page__section {
+        grid-template-columns: {{ section.settings.page_width }}%;
+      }
+    }
+    {% if form_left %}
+      @media screen and (max-width: 740px) {
+      .contact__page-form {
+        grid-row: 2;
+      }
+    }
+    {% endif %}
+    {% unless form_bottom == true %}
+    .contactPage__section-content {
+      grid-template-columns: 1fr 1fr;
+    }
+    {% endunless %}
+  </style>
+</section>
+
+{% schema %}
+  {
+    "name": "Page options",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "label": "Page content width",
+        "unit":"%",
+        "min":50,
+        "max":100,
+        "step":10,
+        "default":100,
+		    "info": "Set the content width for your pages, mobile will show at full page width"
+      },
+      {
+        "type": "select",
+        "id": "form_position",
+        "label": "Contact form position",
+        "options": [
+          {
+            "value": "left",
+            "label": "Left"
+          },
+          {
+            "value": "right",
+            "label": "Right"
+          },
+          {
+            "value": "bottom",
+            "label": "Bottom"
+          }
+        ]
+      }
+    ]
+  }
+{% endschema %}

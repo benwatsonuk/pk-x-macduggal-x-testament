@@ -1,0 +1,126 @@
+<a class="show mobile-3 js-sidebar-toggle" href="#"><i class="fa fa-bars" aria-hidden="true"></i> {{ 'collections.sidebar.refine' | t }}</a>
+<div class="desktop-3 tablet-6 mobile-3 collection__page-sidebar" id="sidebar">
+  {% if collection.image %}
+    <div class="collection__sidebar-image clearfix filter">
+      {% render 'basic-responsive-image', type: collection.image, data_widths: '[180, 360, 540]' %}
+      <noscript>
+        <img src="{{ collection.image | img_url: '220x' }}" class="collection-sidebar-image">
+      </noscript>
+    </div>
+  {% endif %}
+
+  {% if section.blocks.size == 0 %}
+  <p>The sidebar is enabled but no content has been added. Click "add content" to add a menu, filter, text or image</p>
+  {% endif %}
+
+  {% if current_tags.size >= 1 %}
+    <ul class="current_tags">
+    {% for tag in collection.all_tags %}
+      {% if current_tags contains tag %}
+        <li class="current_tag">
+          {{ tag | link_to_remove_tag: tag }}
+        </li>
+      {% endif %}
+    {% endfor %}
+    <li><a class="clear-tags" href="{{ collection.url }}">{{ 'collections.general.clear_all_tags' | t }}</a></li>
+    </ul>
+  {% endif %}
+
+  {% for block in section.blocks %}
+    {% if block.type == 'vendor_list' %}
+      {% if collection.handle == "all" %}
+        <ul>
+          <h4>{{ block.settings.shop_by_designer_title | escape }}</h4>
+          {% for product_vendor in shop.vendors %}
+          <li{% if link.current %} class="current"{% endif %}>{{ product_vendor | link_to_vendor  }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <ul>
+          <h4>{{ block.settings.shop_by_designer_title }}</h4>
+          {% for product_vendor in collection.all_vendors %}
+          <li class="{{ product_vendor | handelize }}{% if link.current %} current{% endif %}">{{ product_vendor | link_to_vendor }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% elsif block.type == 'menu' %}
+      <h4>{{ block.settings.title | escape }}</h4>
+      <ul {{ block.shopify_attributes }}>
+        {% for link in linklists[block.settings.side_nav].links %}
+        <li{% if link.current %} class="current"{% endif %}>{{ link.title | link_to: link.url }}</li>
+        {% endfor %}
+      </ul>
+    {% elsif block.type == 'filter' %}
+      {%- liquid
+
+        assign is_color_filter = false
+
+        assign tags = block.settings.tags  | replace: ' ,', ',' | replace: ', ', ',' | split: ','
+
+        assign filter_title_to_lowercase = block.settings.title | downcase
+
+        if filter_title_to_lowercase contains "color" or filter_title_to_lowercase contains "colour"
+          assign is_color_filter = true
+        endif
+
+        -%}
+      <h4>{{ block.settings.title | escape }}</h4>
+      <div class="clearfix filter {% if is_color_filter %}filter--color{% endif %}">
+        <ul>
+          {% for tag in tags %}
+            {% comment %}
+            If color filter then capture data for color filters
+            {% endcomment %}
+            {% if is_color_filter %}
+              {% assign swatch_image_url = tag | handle | append: '.png' | file_url %}
+              {% assign css_color = tag | split: ' ' | last | handle %}
+              {% capture inline_style %}
+                background-color: {{ css_color }}; background-image: url('{{ swatch_image_url }}');
+              {% endcapture %}
+            {% endif %}
+            {% if current_tags contains tag %}
+            <li class="current">
+              {% if is_color_filter %}
+                <span class="color-filter color-filter--current color-filter--rounded current" data-tag="{{ tag | handle }}" style="{{ inline_style }}" role="button" title="{{ tag }}"></span>
+              {% else %}
+                <a data-tag="{{ tag | handle }}" class="current" href="javascript:void(0)">{{ tag }}</a>
+              {% endif %}
+            </li>
+            {% elsif collection.all_tags contains tag %}
+            <li>
+              {% if is_color_filter %}
+                <span class="color-filter color-filter--rounded" data-tag="{{ tag | handle }}" role="button" title="{{ tag }}" style="{{ inline_style }}"></span>
+              {% else %}
+                <a data-tag="{{ tag | handle }}" href="javascript:void(0)">{{ tag }}</a>
+              {% endif %}
+            </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% elsif block.type == 'sort' %}
+      <div class="clearfix filter">
+        <select id="sort-by" class="styled-select">
+          {% for option in collection.sort_options %}
+              <option value="{{ option.value }}" {% if option.value == collection.sort_by %}selected{% endif %}>{{ option.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    {% elsif block.type == 'text' %}
+      <h4>{{ block.settings.title | escape }}</h4>
+      <div class="clearfix filter">
+        <div class="rte">
+          {{ block.settings.sidebar_text }}
+        </div>
+      </div>
+    {% elsif block.type == 'image' %}
+      {% if block.settings.image != blank %}
+        <div class="clearfix filter">
+          {% if block.settings.link != blank %}<a href="{{ block.settings.link }}">{% endif %}
+            {% render 'basic-responsive-image', type: block.settings.image, data_widths: '[180, 360, 540]' %}
+          {% if block.settings.link != blank %}</a>{% endif %}
+        </div>
+      {% endif %}
+    {% endif %}
+  {% endfor %}
+</div>

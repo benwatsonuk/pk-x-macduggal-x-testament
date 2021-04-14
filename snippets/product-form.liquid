@@ -1,0 +1,95 @@
+{% assign call_to_action = 'products.product.add_to_cart' | t %}
+
+{% unless current_variant.available %}
+  {% assign call_to_action = 'products.product.sold_out' | t %}
+{% endunless %}
+
+{% form 'product', product, id: "AddToCartForm", class: "product_form", data-product-form:product_form_config, data-product-id: product.id %}
+
+  {% render 'product-price', variant: current_variant, product: product %}
+
+  {% if product.options.size > 1 %}
+    <div class="select" {% if product.variants.size == 1 %}style="display: none;"{% endif %}>
+      <select id="{{ section.id }}-product-select-{{ product.id }}" name='id'>
+        {% for variant in product.variants %}
+          <option value="{{ variant.id }}" {% if variant == current_variant %}selected="selected"{% endif %}>
+            {{ variant.title }} - {{ variant.price | money }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% if settings.product_variants == 'swatches' %}
+      {% for option in product.options_with_values %}
+        {% render 'swatch',
+        option: option,
+        product: product,
+        current_variant: current_variant
+        show_color_swatches: settings.show_color_swatches,
+        color_swatch_shape: settings.color_swatch_shape,
+        color_swatch_style: settings.color_swatch_style %}
+      {% endfor %}
+    {% endif %}
+  {% elsif product.options.size == 1 and product.variants.size > 1 %}
+    <div class="select">
+      <label>{{ product.options[0] }}</label>
+      <select id="{{ section.id }}-product-select-{{ product.id }}" name='id'>
+        {% for variant in product.variants %}
+          <option data-sku="{{ variant.sku }}" value="{{ variant.id }}" {% if variant == current_variant %}selected="selected"{% endif %}>
+            {{ variant.title }} - {{ variant.price | money }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    {% if settings.product_variants == 'swatches' %}
+      {% for option in product.options_with_values %}
+      {% render 'swatch',
+      option: option,
+      product: product,
+      current_variant: current_variant
+      show_color_swatches: settings.show_color_swatches,
+      color_swatch_shape: settings.color_swatch_shape,
+      color_swatch_style: settings.color_swatch_style %}
+      {% endfor %}
+    {% endif %}
+  {% else %}
+    <div class="what-is-it">
+      {% if product.options.first != 'Title' %}
+        <label>{{ product.options.first }}:</label>
+        {% for variant in product.variants %}
+          <span class="it-is">{{ variant.option1 | escape }}</span>
+        {% endfor %}
+      {% endif %}
+    </div>
+    <div class="product-variants"></div><!-- product variants -->
+    <input  type="hidden" id="{{ variant.id }}" name="id" data-sku="{{ variant.sku }}" value="{{ product.variants[0].id }}" />
+  {% endif %}
+
+
+  {% if show_sku %}
+    <div class="sku">
+      <label style="line-height: 1.6em; display: inline-block;">{{ 'customer.order.details.sku' | t }}:</label> <span class="variant_sku">{{ current_variant.sku }}</span>
+    </div><div class="clear"></div>
+  {% endif %}
+
+  <div class="product-add">
+    {% if settings.show_quantity %}
+      <div class="qty-selection">
+        <h5>{{ 'products.product.quantity' | t }}</h5>
+        <a class="down quantity-control-down" field="quantity">-</a>
+          <input min="1" type="text" name="quantity" class="quantity" value="1" />
+        <a class="up quantity-control-up" field="quantity">+</a>
+      </div>
+    {% endif %}
+    <div class="note note-success js-added-msg" style="display: none">
+      <b>{{ 'products.product.added' | t }}</b>&nbsp;&nbsp;&nbsp;<a class="underline" href="{{ routes.cart_url }}">{{ 'products.product.view_cart' | t }}</a> {{ 'products.product.or' | t }} <a class="underline" href="{{ routes.all_products_collection_url }}">{{ 'products.product.continue' | t }}</a>.
+    </div>
+    <div class="note note-error js-error-msg" style="display: none">
+      <b>{{ 'cart.general.cart_error' | t }}</b>&nbsp;&nbsp;&nbsp;{{ 'cart.general.update_qty_error' | t }}
+    </div>
+    <input id="addToCart" type="submit" name="button" class="add clearfix AddtoCart js-ajax-submit {% if section.settings.show_payment_button and product.selling_plan_groups.size == 0 %} secondary-button{% endif %}" value="{{ call_to_action }}" {% unless current_variant.available %}disabled{% endunless %} />
+    {% if settings.show_payment_button %}
+     {{ form | payment_button }}
+    {% endif %}
+  </div>
+
+{% endform %}

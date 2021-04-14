@@ -1,0 +1,32 @@
+<section id="page" class="page__section" data-section-id="{{ section.id }}" data-section-type="page-section">
+  <div class="page__section-content">
+    <h1 class="page-title page__section-title">{{ page.title }}</h1>
+      <div class="rte">{{ page.content }}</div>
+    </div>
+  <style>
+    @media screen and (min-width:741px) {
+      .page__section {
+        grid-template-columns: {{ section.settings.page_width }}%;
+      }
+    }
+  </style>
+</section>
+
+{% schema %}
+  {
+    "name": "Page options",
+    "settings": [
+      {
+        "type": "range",
+        "id": "page_width",
+        "label": "Page content width",
+        "unit":"%",
+        "min":50,
+        "max":100,
+        "step":10,
+        "default":100,
+		    "info": "Set the content width for your pages, mobile will show at full page width"
+      }
+    ]
+  }
+{% endschema %}

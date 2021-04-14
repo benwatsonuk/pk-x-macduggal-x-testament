@@ -1,0 +1,50 @@
+{% for i in (1..section.settings.post_limit) %}
+
+{% assign article_title = 'Sample Blog post' | append: '#' | append:  forloop.index %}
+{% assign article_author = shop.name %}
+{% assign article_content = 'Adding featured blog posts to your home page will show the most recent posts from your stores blog. Here is some Sample content for blog post ' | append: forloop.index | append: '.' %}
+{% assign sample_tags = 'Lorem ipsum dolor sit amet consectetur adipisicing elit' | downcase | split: " " %}
+
+<div class="article-index blog__post-container" id="article--onboarding-{{ forloop.index }}" data-alpha="article--onboarding-{{ forloop.index }}">
+  <div class="blog__post-content">
+    <div class="blog__post-image image_landscape onboard">
+      <a href="#" title="{{ article_title }}">
+        {{ 'image' | placeholder_svg_tag }}
+      </a>
+    </div>
+    <div class="blog__post-details">
+      <div class="blog__post-title">
+        <h3><a href="#">{{ article_title }}</a></h3>
+      </div>
+      {% if section.settings.show_author %}
+      <span class="blog__post-author posted">{{ article_author }}</span>
+      {% endif %}
+      {% if section.settings.show_date %}
+      {% assign published_at = 'now' | date: format: 'month_date_year' %}
+      <span class="blog__post-date posted">{{ 'blogs.article.posted_on_date_html' | t: date: published_at }}</span>
+      {% endif %}
+      <div class="blog__post-excerpt">
+        <div class="rte">
+          {{ article_content | truncate: 90 }}
+        </div>
+        {% if section.settings.show_tags %}
+          <ul class="blog__post-tags">
+            {% for tag in sample_tags %}
+              <li class="blog__post-tag">
+                <a href="#">
+                  {{ tag }}
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if section.settings.show_button %}
+          <div class="blog__post-button readmore">
+            <a href="#">{{ 'blogs.article.read_more' | t }}</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}

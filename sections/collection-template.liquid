@@ -1,0 +1,374 @@
+<section class="collection__page" data-section-id="{{ section.id }}" data-section-type="collection-section">
+{% assign number = section.settings.products_per_page %}
+{% paginate collection.products by number %}
+
+{% if section.settings.products_per_row %}
+{% assign products_per_row = section.settings.products_per_row %}
+{% else if section.settings.products-per-row %}
+{% assign products_per_row = section.settings.products-per-row %}
+{% endif %}
+
+<h1 class="boost-pfs-filter-collection-header colleciton__page-title page-title">
+	{% if collection.handle == 'all' %}{{ 'collections.general.all_products' | t }}{% else %}{{ collection.title }}{% endif %}
+</h1>
+
+<div class="collection__page-description desktop-12 tablet-6 mobile-3">
+	<div class="boost-pfs-filter-collection-description rte">
+		{{ collection.description | remove: "[banner]" }}
+	</div>
+</div>
+
+<div class="clear"></div>
+
+{% assign sidebar = true %}
+
+<!-- Start Sidebar -->
+<div class="boost-pfs-filter-tree-mobile-button tablet-4 tablet-push-1 mobile-3">{% include 'boost-pfs-filter-skeleton', type: 'button' %}</div>
+<div class="desktop-3 tablet-4 tablet-push-1 mobile-3">
+	{% if collection.image %}
+	  <div class="collection__sidebar-image clearfix filter">
+		{% render 'basic-responsive-image', type: collection.image, data_widths: '[180, 360, 540]' %}
+		<noscript>
+		  <img src="{{ collection.image | img_url: '220x' }}" class="collection-sidebar-image">
+		</noscript>
+	  </div>
+	{% endif %}
+	  <div class="clearfix filter boost-pfs-filter-top-sorting">
+		{% include 'boost-pfs-filter-skeleton', width: 3 %}
+	</div>
+	<div class="boost-pfs-filter-tree boost-pfs-filter-tree-v" >
+		{% comment %} Include placeholder template {% endcomment %}
+		{% include 'boost-pfs-filter-skeleton', type: 'filter-tree'  %}
+	</div>
+</div>
+<!-- End Sidebar -->
+
+<div class="{% if sidebar %}desktop-9 tablet-6{% else %}desktop-12 tablet-6{% endif %} mobile-3">
+	<div class="collection__page-products product-loop" data-boost-sort="{{ collection.default_sort_by }}">
+		{% for product in collection.products %}
+			<div id="product-listing-{{ product.id }}" class="collection__page-product product-index js-product-listing" data-alpha="{{ product.title }}" data-price="{{ product.price }}">
+				{% render 'product-listing', product: product, collection: collection %}
+			</div>
+		{% endfor %}
+	</div>
+	  {% assign grid = section.settings.products_per_row %}
+	<style>
+	  .collection__page-products {
+		grid-template-columns: repeat({{ grid }}, 1fr);
+	  }
+	</style>
+</div>
+
+<div id="pagination" class="desktop-12 tablet-6 mobile-3">
+	<span class="count"></span>
+	<div class="clear"></div>
+	<div class="boost-pfs-filter-bottom-pagination"></div>
+	<div class="boost-pfs-filter-load-more desktop-push-4 desktop-4 tablet-6 mobile-3"></div>
+</div>
+
+{% endpaginate %}
+
+</section>
+
+<script>
+	// Declare boostPFSThemeConfig variable
+	var boostPFSThemeConfig = {
+		label: {
+			sorting: {% assign temp = 'collections.sorting.title' | t  %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Sorting" {% endunless %},
+			sorting_best_selling: {% assign temp = 'collections.sorting.best_selling' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Best Selling" {% endunless %},
+			sorting_featured: {% assign temp = 'collections.sorting.featured' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Featured" {% endunless %},
+			sorting_title_ascending: {% assign temp = 'collections.sorting.az' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Alphabetically, A-Z" {% endunless %},
+			sorting_title_descending: {% assign temp = 'collections.sorting.za' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Alphabetically, Z-A" {% endunless %},
+			sorting_price_ascending: {% assign temp = 'collections.sorting.price_ascending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Lowest Price" {% endunless %},
+			sorting_price_descending: {% assign temp = 'collections.sorting.price_descending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Highest Price" {% endunless %},
+			sorting_date_ascending: {% assign temp = 'collections.sorting.date_ascending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Date, Old to New" {% endunless %},
+			sorting_date_descending: {% assign temp = 'collections.sorting.date_descending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Date, New to Old" {% endunless %},
+			sorting_sale_descending: {% assign temp = 'collections.sorting.sale_descending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "% Off" {% endunless %},
+			sorting_relevance: {% assign temp = 'collections.sorting.relevance' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Relevance" {% endunless %},
+
+			sale: {{ 'products.general.sale' | t | json }},
+			sold_out: {{ 'products.general.sold' | t | json }},
+			new: {{ 'products.general.new' | t | json }},
+			quick_view: {{ 'products.general.quick_view' | t | json }},
+			from_price: {{ 'products.general.from' | t | json }},
+			showing_items: {{ 'general.pagination.showing_items' | t | json }},
+			pagination_of: {{ 'general.pagination.of' | t | json }},
+		},
+		custom: {
+			products_per_page:  {% if section.settings.products_per_page %} {{ section.settings.products_per_page | json }} {% else %} 20 {% endif %},
+			products_per_row: {% if products_per_row %} {{ products_per_row }} {% else %} 4 {% endif %},
+			vendor_enable: {% if settings.vendor %} {{ settings.vendor | json }} {% else %} false {% endif %},
+			quick_view_enable: {% if settings.quickview %} {{ settings.quickview | json }} {% else %} false {% endif %},
+			secondary_images_hover: {% if settings.secondary_images_hover %} {{ settings.secondary_images_hover | json }} {% else %} "no_hover_effect" {% endif %},
+			  product_image_size: {% if settings.product_image_size %} {{ settings.product_image_size | json }} {% else %} '' {% endif %},
+			product1_url: {{ 'product-1' | placeholder_svg_tag | json }}
+		},
+	};
+</script>
+{% schema %}
+
+{
+  "name": "Collection page",
+  "max_blocks": 8,
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "min": 2,
+      "max": 50,
+      "step": 1,
+      "label": "How many products per page",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "products_per_row",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "label": "Products per row",
+      "default": 4
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sidebar",
+      "default": true,
+      "label": "Show sidebar"
+    },
+    {
+      "type": "select",
+      "id": "description_position",
+      "label": "Description position",
+      "default":"top",
+      "options": [
+        {
+          "value": "top",
+          "label": "Top"
+        },
+        {
+          "value": "bottom",
+          "label": "Bottom"
+        }
+      ]
+    }
+  ],
+  "blocks": [
+    {
+      "type": "menu",
+      "name": "Menu",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Menu title",
+          "default": "Explore"
+        },
+        {
+          "type": "link_list",
+          "id": "side_nav",
+          "default":"main-menu",
+          "label": "Sidebar menu",
+          "info": "This menu won't show dropdown items"
+        }
+      ]
+    },
+    {
+      "type": "vendor_list",
+      "name": "Vendor list",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "shop_by_designer_title",
+          "label": "Vendor list title",
+          "default": "Shop by Designer"
+        }
+      ]
+    },
+    {
+      "type": "filter",
+      "name": "Tag filter",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tag title",
+          "default": "Filter by"
+        },
+        {
+          "type": "textarea",
+          "id": "tags",
+          "label": "Tags to filter",
+          "info": "Add each tag for this filter, separated by a comma"
+        }
+      ]
+    },
+    {
+      "type": "image",
+      "name": "Image",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+        {
+          "id": "link",
+          "type": "url",
+          "label": "Link"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "name": "Rich text",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Made for you"
+        },
+        {
+          "type": "richtext",
+          "id": "sidebar_text",
+          "label": "Text",
+          "default": "<p>Add some text to the sidebar</p>"
+        }
+      ]
+    },
+    {
+      "type": "sort",
+      "name": "Sort by",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Tag title",
+          "default": "Sort by"
+        }
+      ]
+    },
+    {
+      "type": "banner",
+      "name": "Banner image",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Add a banner image above products to advertise a Sale or other content. Shown on all collection pages."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image",
+          "info" : "1400px width recommended"
+        },
+        {
+           "type":    "range",
+           "id":      "height",
+           "min":     100,
+           "max":     250,
+           "step":    10,
+           "unit":    "px",
+           "label":   "Image height",
+           "default": 150
+        },
+        {
+         "type":    "range",
+         "id":      "mobile_height",
+         "min":     100,
+         "max":     300,
+         "step":    10,
+         "unit":    "px",
+         "label":   "Image height (mobile)",
+         "default": 150
+        },
+        {
+          "id": "link",
+          "type": "url",
+          "label": "Link"
+        },
+        {
+          "type": "richtext",
+          "id": "banner_text",
+          "label": "Banner text",
+          "default": "<p>Banner overlay text</p>"
+        },
+        {
+          "type": "text",
+          "id": "button_text",
+          "label": "Button text",
+          "default": "Button"
+        },
+        {
+          "type": "select",
+          "id": "text_align",
+          "label": "Text alignment",
+          "default": "center",
+          "options": [
+            {
+              "value": "left",
+              "label": "Left"
+            },
+            {
+              "value": "center",
+              "label": "Center"
+            }
+          ]
+        },
+        {
+          "type": "range",
+          "id": "caption_horizontal",
+          "min": 0,
+          "max": 100,
+          "step": 2,
+          "unit": "%",
+          "label": "Text horizontal position",
+          "default": 50
+        },
+        {
+          "type": "range",
+          "id": "caption_vertical",
+          "min": 0,
+          "max": 100,
+          "step": 2,
+          "unit": "%",
+          "label": "Text vertical position",
+          "default": 50
+        },
+        {
+          "type":      "range",
+          "id":        "text_size",
+          "min":       13,
+          "max":       26,
+          "step":      1,
+          "unit":      "px",
+          "label":     "Text size",
+          "default":   16
+        },
+        {
+          "type": "color",
+          "id": "text_color",
+          "label": "Text color",
+          "default": "#000"
+        },
+        {
+          "type": "color",
+          "id": "button_color",
+          "label": "Button text",
+          "default": "#fff"
+        },
+        {
+          "type": "color",
+          "id": "button_background",
+          "label": "Button background",
+          "default": "#000"
+        }
+      ]
+    }
+  ]
+}
+
+{% endschema %}

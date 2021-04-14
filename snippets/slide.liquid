@@ -1,0 +1,74 @@
+    <div id="slide--{{ slide.id }}" data-slide-id="{{ slide.id }}" class="slide--{{ slide.id }} slideshow__slide{% if slide.settings.image == blank %} slideshow__slide-onboard{% endif %}" data-slider-index="{{ forloop.index0 }}" {{ slide.shopify_attributes }}>
+      {% if slide.settings.image == blank %}
+        {% capture current %}{% cycle 1, 2 %}{% endcapture %}
+        {%- assign placeholder = 'lifestyle-' | append: current -%}
+        {{ placeholder | placeholder_svg_tag: 'placeholder-svg' }}
+      {% else %}
+        {% assign image_box_ratio = slide.settings.image.height | append: ".0" | times: 1 | divided_by: slide.settings.image.width | times: 100 | append: "%" %}
+        {% assign img_url = slide.settings.image | img_url: '1x1' | replace: '_1x1.', '_{width}x.' %}
+        {% if slide.settings.link != blank  and slide.settings.button_text == blank%}<a href="{{ slide.settings.link }}">{% endif %}
+          <div class="box-ratio" style="padding-bottom: {{ image_box_ratio }};">
+            <img class="slideshow__image slideshow__image--{{ slide.id }} lazyload lazyload-fade"
+              data-src="{{ img_url }}"
+              data-sizes="auto"
+              data-parent-fit="cover"
+              alt="{{ slide.settings.image.alt | escape }}">
+          </div>
+          <noscript>
+            <img src="{{ slide.settings.image | img_url: '1024x' }}" alt="{{ slide.settings.image.alt | escape }}" class="slideshow__image slideshow__image--{{ slide.id }}">
+          </noscript>
+        {% if slide.settings.link != blank and slide.settings.button_text == blank %}</a>{% endif %}
+      {% endif %}
+        {% if slide.settings.heading == blank and slide.settings.subheading == blank and slide.settings.button_text == blank %}
+        {% assign hide_caption = true %}
+        {% endif %}
+        {% unless hide_caption %}
+        <div class="slideshow__caption slide-{{ slide.id }}">
+          <div class="slideshow__caption-wrapper">
+            {% if slide.settings.heading != blank %}
+            <h2 class="slideshow__title">{{ slide.settings.heading | escape }}</h2>
+            {% endif %}
+            {% if slide.settings.subheading != blank %}
+            {{ slide.settings.subheading }}
+            {% endif %}
+            {% if slide.settings.button_text != blank and slide.settings.link != blank %}
+            <div class="slideshow__btn-wrapper">
+              {{ slide.settings.button_text | escape | link_to: slide.settings.link }}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <style>
+          .slideshow__caption.slide-{{ slide.id }} {
+            top: {{ slide.settings.caption_vertical_position }}%;
+            left: {{ slide.settings.caption_horizontal_position }}%;
+            -webkit-transform: translate(-{{ slide.settings.caption_horizontal_position }}%, -{{ slide.settings.caption_vertical_position }}%);
+            -ms-transform: translate(-{{ slide.settings.caption_horizontal_position }}%, -{{ slide.settings.caption_vertical_position }}%);
+            -moz-transform: translate(-{{ slide.settings.caption_horizontal_position }}%, -{{ slide.settings.caption_vertical_position }}%); -o-transform: translate(-{{ slide.settings.caption_horizontal_position }}%, -{{ slide.settings.caption_vertical_position }}%); transform: translate(-{{ slide.settings.caption_horizontal_position }}%, -{{ slide.settings.caption_vertical_position }}%);
+          }
+          .slideshow__caption.slide-{{ slide.id }} .slideshow__caption-wrapper {
+            {% assign bg_color = slide.settings.caption_background %}
+            {% assign number = slide.settings.caption_background_opacity %}
+            {% assign caption_background_opacity = number | divided_by: 100.0 %}
+            {% if slide.settings.caption_background == 'rgba(0,0,0,0)' %}
+            background: transparent;
+            {% else %}
+            background: {{ bg_color | color_modify: 'alpha', caption_background_opacity }};
+            {% endif %}
+            text-align: {{ slide.settings.text_align }};
+          }
+          .slideshow__caption.slide-{{ slide.id }} h2.slideshow__title,
+          .slideshow__caption.slide-{{ slide.id }} p {
+            color: {{ slide.settings.slide_text_color }};
+          }
+          .slideshow__caption.slide-{{ slide.id }} .slideshow__btn-wrapper a {
+            color: {{ slide.settings.cta_color }};
+            background: {{ slide.settings.cta_background }};
+            border: 1px solid {{ slide.settings.cta_background }};
+          }
+          .slideshow__caption.slide-{{ slide.id }} .slideshow__btn-wrapper a:hover {
+            color: {{ slide.settings.cta_background }};
+          }
+        </style>
+        {% endunless %}
+    </div>

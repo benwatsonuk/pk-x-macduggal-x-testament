@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <!-- Establish early connection to external domains -->
+  <link rel="preconnect" href="https://cdn.shopify.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.shopify.com" crossorigin>
+  <link rel="preconnect" href="https://monorail-edge.shopifysvc.com">
+  <link rel="preconnect" href="//ajax.googleapis.com" crossorigin />
+
+  {%- assign main_font = settings.main_font -%}
+  {%- assign heading_font = settings.heading_font -%}
+  {%- assign nav_font = settings.nav_font -%}
+  {%- assign main_font_bold = main_font | font_modify: 'weight', 'bolder' -%}
+  {%- assign main_font_italic = main_font | font_modify: 'style', 'italic' -%}
+  {%- assign main_font_bold_italic = main_font_bold | font_modify: 'style', 'italic' -%}
+
+  <!-- Preload onDomain stylesheets and script libraries -->
+  <link rel="preload" href="{{ 'stylesheet.css' | asset_url }}" as="style">
+  <link rel="preload" as="font" href="{{ main_font | font_url }}" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="{{ nav_font | font_url }}" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="{{ heading_font | font_url }}" type="font/woff2" crossorigin>
+  <link rel="preload" href="{{ 'eventemitter3.min.js' | asset_url }}" as="script">
+  <link rel="preload" href="{{ 'theme.js' | asset_url }}" as="script">
+  <link rel="preload" href="{{ 'option_selection.js' | shopify_asset_url }}" as="script">
+
+  {% if settings.favicon %}<link rel="shortcut icon" href="{{ settings.favicon | img_url: '32x32' }}" type="image/png" />{% endif %}
+  <link rel="canonical" href="{{ canonical_url }}" />
+
+  <title>{{ page_title }}{% if current_tags %} &ndash; tagged "{{ current_tags | join: ', ' }}"{% endif %}{% if current_page != 1 %} &ndash; Page {{ current_page }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless %}</title>
+  {% if page_description %}<meta name="description" content="{{ page_description | escape }}" />{% endif %}
+
+  {% render 'structured-data' %}
+  {% render 'social-meta-tags' %}
+  {% include 'css-variables' %}
+
+  <link rel="stylesheet" href="{{ 'stylesheet.css' | asset_url }}" type="text/css">
+
+  <style>
+  {{ main_font | font_face: font_display: 'swap' }}
+  {{ nav_font | font_face: font_display: 'swap' }}
+  {{ heading_font | font_face: font_display: 'swap' }}
+  {{ main_font_bold | font_face: font_display: 'swap' }}
+  {{ main_font_italic | font_face: font_display: 'swap' }}
+  {{ main_font_bold_italic | font_face: font_display: 'swap' }}
+  </style>
+
+  {{ content_for_header }}
+
+
+<!--begin-boost-pfs-filter-css-->
+  {% render 'boost-pfs-style' %}
+<!--end-boost-pfs-filter-css-->
+
+
+</head>
+<body class="gridlock template-{{ template | handleize }} {% if template contains 'product' %}product{% elsif template contains 'collection' %}collection{% else %}{{ template | handleize }}{% endif %} js-slideout-toggle-wrapper js-modal-toggle-wrapper product-variant-type--{{ settings.product_variants }} {% if settings.image_hover_scale %}theme-image-effect{% endif %} {% if settings.button_corners == 'curved' %}theme-buttons-curved{% endif %} {% if settings.secondary_images_hover %}theme-image-hover{% endif %} {% if settings.product_border %}theme-border{% endif %}">
+  <div class="js-slideout-overlay site-overlay"></div>
+  <div class="js-modal-overlay site-overlay"></div>
+
+  <aside class="slideout slideout__drawer-left" data-wau-slideout="mobile-navigation" id="slideout-mobile-navigation">
+    {% section 'mobile-navigation' %}
+  </aside>
+
+  <div class="site-wrap">
+    <div class="page-wrap">
+      {% section 'header' %}
+      {% if template contains 'collection' %}
+        {% if collection.description contains '[banner]' %}
+          {% capture banner %}{{ collection.handle }}.jpg{% endcapture %}
+          {% capture alt %}{{ collection.title }}{% endcapture %}
+          <div class="collection-banner">
+            {% assign img_url = banner | file_img_url: '1x1' | replace: '_1x1.', '_{width}x.' %}
+
+            <img class="lazyload lazyload-fade"
+              src="{{ banner | file_url }} "
+              data-src="{{ img_url }}"
+              data-sizes="auto"
+              alt="{{ alt }}">
+          </div>
+        {% endif %}
+      {% endif %}
+
+      <main class="content-wrapper" role="main">
+        {% if template == 'index' or template contains 'blog' or template contains 'list-collections' or template.suffix contains 'custom' or template contains 'product' %}
+          {{ content_for_layout }}
+        {% else %}
+          <div id="content" class="row">
+            {% if template != 'index' %}
+              {% if settings.breadcrumb %}
+                {% render 'breadcrumb' %}
+              {% endif %}
+            {% endif %}
+            {{ content_for_layout }}
+          </div>
+        {% endif %}
+        {% if template != 'index' %}
+        {% section 'content-promotion' %}
+        {% endif %}
+      </main>
+    </div>
+    {% section 'footer' %}
+
+    <a href="#" class="scrollup"><i class="fa fa-angle-up fa-2x"></i></a>
+
+  </div>
+
+  {%- if settings.cart_type == 'drawer' -%}
+    <aside class="slideout slideout__drawer-right mini-cart" data-wau-slideout="ajax-cart" id="slideout-ajax-cart">
+      {% render 'cart-mini' %}
+    </aside>
+  {% elsif settings.cart_type == 'modal_cart' %}
+    <div class="modal__container" data-wau-modal="ajax-cart" id="modal-ajax-cart">
+      <div class="modal__inner-wrapper">
+        {% render 'cart-mini' %}
+      </div>
+    </div>
+  {%- endif -%}
+
+  {%- if settings.quickview -%}
+    <div class="modal__container" data-wau-modal="quickview" id="modal-quickview-cart">
+      <div class="modal__inner-wrapper">
+        {%- render 'product-quickview' -%}
+      </div>
+    </div>
+  {%- endif -%}
+
+  <script src="{{ 'eventemitter3.min.js' | asset_url }}"></script>
+  <script src="{{ 'theme.js' | asset_url }}"></script>
+  <script src="{{ 'option_selection.js' | shopify_asset_url }}"></script>
+
+  {% section 'popup' %}
+
+  <script>
+    window.lazySizesConfig = window.lazySizesConfig || {};
+    window.lazySizesConfig.minSize = 360;
+  </script>
+
+
+  <script src="{{ 'shopify_common.js' | shopify_asset_url }}" defer="defer"></script>
+
+  {%- if request.page_type contains 'customers/' -%}
+    <script src="{{ 'customer_area.js' | shopify_asset_url }}" defer="defer"></script>
+  {%- endif -%}
+
+  <script>
+    document.documentElement.className =
+    document.documentElement.className.replace("no-js","js");
+  </script>
+
+ <!-- Root element of PhotoSwipe. Must have class pswp. -->
+  <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+      <!-- Background of PhotoSwipe.
+           It's a separate element as animating opacity is faster than rgba(). -->
+      <div class="pswp__bg"></div>
+      <!-- Slides wrapper with overflow:hidden. -->
+      <div class="pswp__scroll-wrap">
+          <!-- Container that holds slides.
+              PhotoSwipe keeps only 3 of them in the DOM to save memory.
+              Don't modify these 3 pswp__item elements, data is added later on. -->
+          <div class="pswp__container">
+              <div class="pswp__item"></div>
+              <div class="pswp__item"></div>
+              <div class="pswp__item"></div>
+          </div>
+          <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+          <div class="pswp__ui pswp__ui--hidden">
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+            <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+          </div>
+      </div>
+  </div>
+
+<!--begin-boost-pfs-js-->
+  {% render 'boost-pfs' %}
+<!--end-boost-pfs-js-->
+</body>
+</html>

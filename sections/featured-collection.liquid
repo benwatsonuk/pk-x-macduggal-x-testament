@@ -1,0 +1,111 @@
+<section class="index-section" data-section-id="{{ section.id }}" data-section-type="homepage-products" >
+  <div class="row">
+
+    {% if section.settings.title != blank %}
+      <div class="section-title {% if settings.section_titles == 'lines' %}lines {% elsif settings.section_titles == 'btm_border' %}btm_border {% endif %} desktop-12 tablet-6 mobile-3"><h2>{{ section.settings.title | escape }}</h2></div>
+      <div class="clear"></div>
+    {% endif %}
+
+    {%- assign collection = collections[section.settings.collection] -%}
+    {% if section.settings.carousel %}{%- assign is_carousel = true -%}{%- endif -%}
+    {%- assign prod_limit = section.settings.limit -%}
+    {%- assign grid = section.settings.grid -%}
+    {% capture slideshow_config %}{
+      "wrapAround":true,
+      "cellAlign": "left",
+      "dragThreshold":"15",
+      "pauseAutoPlayOnHover":false,
+      "prevNextButtons":true,
+      "pageDots": true
+   }{% endcapture %}
+
+    <div id="featured_collection--{{ section.id }}" class="featured__collection{% if is_carousel %}-carousel flickity__section js-carousel{% endif %} product-loop"{% if is_carousel %} data-flickity='{{ slideshow_config }}'{% endif %} data-slideout-ignore>
+      {% if section.settings.collection == blank %}
+      {% render 'onboard-product', prod_limit: prod_limit, grid: grid %}
+      {% else %}
+      {% for product in collection.products limit: prod_limit %}
+      <div class="featured__collection-product product-index js-product-listing" id="product-listing-{{ product.id }}" data-product-id="{{ product.id }}" data-alpha="{{ product.title }}" data-price="{{ product.price }}">
+        {% render 'product-listing', product: product, collection: collection %}
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+
+  {% case section.settings.grid %}
+  {% when 2 %}
+  {%- assign prod_grid = 50 -%}
+  {% when 3 %}
+  {%- assign prod_grid = 33.333 -%}
+  {% when 4 %}
+  {%- assign prod_grid = 25 -%}
+  {% when 5 %}
+  {%- assign prod_grid = 20 -%}
+  {% endcase %}
+
+  <style>
+  {% if is_carousel %}
+    #featured_collection--{{ section.id }}.featured__collection-carousel .featured__collection-product {
+      width: {{ prod_grid }}%;
+      box-sizing: border-box !important;
+    }
+  {% else %}
+    #featured_collection--{{ section.id }}.featured__collection {
+      display: grid;
+      grid-template-columns: repeat({{ grid }}, {{ prod_grid }}%);
+    }
+  {% endif %}
+  </style>
+
+
+</section>
+<div class="clear"></div>
+
+
+{% schema %}
+{
+  "name": "Featured collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Featured collection"
+    },
+    {
+      "id": "collection",
+      "type": "collection",
+      "label": "Collection"
+    },
+    {
+      "id": "carousel",
+      "type": "checkbox",
+      "label": "Display in carousel"
+    },
+    {
+      "type":      "range",
+      "id":        "grid",
+      "min":       2,
+      "max":       5,
+      "step":      1,
+      "label":     "Product grid",
+      "default":   4
+    },
+    {
+      "type":      "range",
+      "id":        "limit",
+      "min":       2,
+      "max":       30,
+      "step":      1,
+      "label":     "Products shown",
+      "default":   12
+    }
+  ],
+  "presets": [
+    {
+      "name": "Featured collection",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

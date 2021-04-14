@@ -1,0 +1,168 @@
+<section class="article__section" data-section-id="{{ section.id }}" data-section-type="article-section">
+  {% assign number_of_comments = article.comments_count %}
+  {% if comment and comment.created_at %}
+    {% assign number_of_comments = article.comments_count | plus: 1 %}
+  {% endif %}
+  {% paginate article.comments by 20 %}
+
+  <div class="article__section-container">
+    <div class="article__section-body">
+      <h1 class="page-title article__section-title">{{ article.title }}</h1>
+      {% if article.image %}
+        <div class="article__section-image">
+          {% render 'basic-responsive-image',
+          type: article.image,
+          data_widths: '[180, 360, 540, 720, 900, 1080]' %}
+          <noscript>
+          <img src="{{ article.image | img_url: '800x' }}" alt="{{ article.image.alt }}">
+          </noscript>
+        </div>
+      {% endif %}
+      <div class="article__section-details rte">{{ article.content }}</div>
+      {% if section.settings.show_author %}
+        <span class="posted article__section-author">{{ article.author }}</span>
+      {% endif %}
+      {% if section.settings.show_date %}
+        {% assign published_at = article.published_at | date: format: 'month_date_year' %}
+        <span class="posted article__section-date">{{ 'blogs.article.posted_on_date_html' | t: date: published_at }}</span>
+      {% endif %}
+      {% render 'social' with article %}
+    </div>
+
+    <div id="product-navigation" class="desktop-12 tablet-6 mobile-3">
+      <div class="section-title {% if settings.section_titles == 'lines' %}lines {% elsif settings.section_titles == 'btm_border' %}btm_border {% endif %}"><h3>{{ 'blogs.article.more_posts' | t }}</h3></div>
+      <div id="back-forth">
+        {% if blog.previous_article %}
+          <span class="prev-prod">
+            &larr; {{ 'blogs.article.older_post' | t | link_to: blog.previous_article }}
+          {% endif %}
+        </span>
+        {% if blog.next_article %}
+          <span class="next-prod">
+            {{ 'blogs.article.newer_post' | t | link_to: blog.next_article }} &rarr;
+          </span>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if blog.comments_enabled? %}
+    <div id="article__section-comments">
+      <div class="section-title {% if settings.section_titles == 'lines' %}lines {% elsif settings.section_titles == 'btm_border' %}btm_border {% endif %}">
+        <h3>{{ 'blogs.comments.comments_with_count' | t: count: number_of_comments }}</h3>
+      </div>
+      <div class="clear"></div>
+      <div class="article__section-commentContainer">
+        <ul class="article__section-commentList">
+        {% for comment in article.comments %}
+          <li class="article__section-comment">
+            <div class="gravatar article__section-avatar">
+              <img src="//www.gravatar.com/avatar/{{ comment.email | remove: ' ' | strip_newlines | downcase | md5 }}" />
+            </div>
+            <div class="article__comment-author">
+              {{ comment.author }}: {{ comment.created_at | date: "%B %d, %Y" }}
+            </div>
+            <div class="article__section-commentContent">
+              {{ comment.content }}
+            </div>
+          </li>
+        {% endfor %}
+          <div id="pagination">
+            {% if paginate.previous %}
+            {{ '<' | link_to: paginate.previous.url }}
+            {% endif %}
+            {% for part in paginate.parts %}
+            {% if part.is_link %}
+              {{ part.title | link_to: part.url }}
+            {% else %}
+              {% if part.title == '&hellip;' %}
+                {{ part.title }}
+              {% else %}
+                <span class="current">{{ part.title }}</span>
+              {% endif %}
+            {% endif %}
+            {% endfor %}
+            {% if paginate.next %}
+            {{ '>' | link_to: paginate.next.url }}
+            {% endif %}
+          </div>
+        </ul>
+
+        <div id="article__section-commentForm">
+          {% form article %}
+            <h5>{{ 'blogs.comments.title' | t }}</h5>
+            <!-- Check if a comment has been submitted in the last request, and if yes display an appropriate message -->
+            {% if form.posted_successfully? %}
+              {% if blog.moderated? %}
+                <div class="notice">
+                  {{ 'success_moderated' | t }}
+                </div>
+              {% else %}
+                <div class="notice">{{ 'success' | t }}</div>
+              {% endif %}
+            {% endif %}
+
+            {% if form.errors %}
+              <div class="notice error">{{ 'general.forms.post_error' | t }}</div>
+            {% endif %}
+            <dl>
+              <dt class="{% if form.errors contains 'author' %}error{% endif %}"><label for="comment_author">{{ 'blogs.comments.your_name' | t }}</label></dt>
+              <dd><input type="text" id="comment_author" name="comment[author]" size="40" value="{{form.author}}" class="{% if form.errors contains 'author' %}input-error{% endif %}" /></dd>
+              <dt class="{% if form.errors contains 'email' %}error{% endif %}"><label for="comment_email">{{ 'blogs.comments.your_email' | t }}</label></dt>
+              <dd><input type="text" id="comment_email" name="comment[email]" size="40" value="{{form.email}}" class="{% if form.errors contains 'email' %}input-error{% endif %}" /></dd>
+              <dt class="{% if form.errors contains 'body' %}error{% endif %}"><label for="comment_body">{{ 'blogs.comments.your_comment' | t }}</label></dt>
+              <dd><textarea id="comment_body" name="comment[body]" cols="40" rows="5" class="{% if form.errors contains 'body' %}input-error{% endif %}">{{form.body}}</textarea></dd>
+            </dl>
+            {% if blog.moderated? %}
+              <p class="hint">{{ 'blogs.comments.moderated' | t }}</p>
+            {% endif %}
+            <input type="submit" value="{{ 'blogs.comments.post' | t }}" />
+          {% endform %}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% endpaginate %}
+
+  <style>
+    @media screen and (min-width:741px) {
+      .article__section-container {
+        grid-template-columns: {{ section.settings.page_width }}%;
+      }
+    }
+  </style>
+
+</section>
+
+
+
+{% schema %}
+  {
+    "name": "Article options",
+    "settings": [
+    {
+      "type": "range",
+      "id": "page_width",
+      "label": "Page content width",
+      "unit":"%",
+      "min":50,
+      "max":100,
+      "step":10,
+      "default":100,
+      "info": "Set the content width for your pages, mobile will show at full page width"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_date",
+      "label": "Show published date",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Show Author",
+      "default": true
+    }
+	]
+}
+{% endschema %}

@@ -1,0 +1,120 @@
+<div class="desktop-12 tablet-6 mobile-3">
+	<h2>{{ 'general.search.title' | t }}</h2>
+
+	<div id="search-bar">
+		<form action="{{ routes.search_url }}" method="get">
+			<p class="boost-pfs-search-result-header"></p>
+			<input type="text" name="q" id="q" placeholder="{{ 'general.search.placeholder' | t }}"/>
+			<p class="boost-pfs-search-result-number">{% include 'boost-pfs-filter-skeleton', width: 3 %}</p>
+		</form>
+	</div>
+</div>
+
+<div class="desktop-12 boost-pfs-search-result-toolbar">
+	<div class="boost-pfs-search-result-item">
+		<ul class="boost-pfs-search-result-panel-controls">
+			<li>{% include 'boost-pfs-filter-skeleton', width: 2 %}</li>
+			<li>{% include 'boost-pfs-filter-skeleton', width: 2 %}</li>
+			<li>{% include 'boost-pfs-filter-skeleton', width: 1 %}</li>
+		</ul>
+	</div>
+	<div class="boost-pfs-search-result-item">
+		<span class="boost-pfs-search-total-result">
+			{% include 'boost-pfs-filter-skeleton', width: 2 %}
+		</span>
+	</div>
+</div>
+
+<!-- Start Sidebar -->
+<div class="boost-pfs-filter-tree-mobile-button tablet-4 tablet-push-1 mobile-3">{% include 'boost-pfs-filter-skeleton', type: 'button' %}</div>
+<div class="desktop-3 tablet-4 tablet-push-1 mobile-3">
+	  <div class="clearfix filter boost-pfs-filter-top-sorting">
+		{% include 'boost-pfs-filter-skeleton', width: 3 %}
+	</div>
+	<div class="boost-pfs-filter-tree boost-pfs-filter-tree-v" >
+		{% comment %} Include placeholder template {% endcomment %}
+		{% include 'boost-pfs-filter-skeleton', type: 'filter-tree'  %}
+	</div>
+</div>
+<!-- End Sidebar -->
+
+<div class="desktop-9 tablet-6 mobile-3">
+
+	<div class="collection__page-products product-loop">
+		{% comment %} Fix Shopify search term report {% endcomment %}
+		{% paginate search.results by 2 %}
+			{% if search.performed %}
+				{% for item in search.results %}
+					<div class="grid__item" style="display: none !important"></div>
+				{% endfor %}
+			{% endif %}
+		{% endpaginate %}
+	</div>
+	  {% assign grid = 4 %}
+	<style>
+	  .collection__page-products {
+		grid-template-columns: repeat({{ grid }}, 1fr);
+	  }
+	</style>
+</div>
+
+<div id="pagination" class="desktop-12 tablet-6 mobile-3 boost-pfs-search-panel-product-show">
+	<span class="count"></span>
+	<div class="clear"></div>
+	<div class="boost-pfs-filter-bottom-pagination"></div>
+	<div class="boost-pfs-filter-load-more desktop-push-4 desktop-4 tablet-6 mobile-3"></div>
+</div>
+
+<div class="boost-pfs-search-result-wrap desktop-12 boost-hidden">
+	<div class="boost-pfs-search-result-collections">
+		<div class="boost-pfs-search-result-list-item"><a href="#">{% include 'boost-pfs-filter-skeleton', width: 4 %}</a></div>
+		<div class="boost-pfs-search-result-list-item"><a href="#">{% include 'boost-pfs-filter-skeleton', width: 3 %}</a></div>
+		<div class="boost-pfs-search-result-list-item"><a href="#">{% include 'boost-pfs-filter-skeleton', width: 4 %}</a></div>
+	</div>
+	<div class="boost-pfs-filter-pagination-wrapper desktop-12 tablet-6 mobile-3"><div class="boost-pfs-search-result-collection-pagination">{% include 'boost-pfs-filter-skeleton', width: 4 %}</div></div>
+</div>
+<div class="boost-pfs-search-result-wrap desktop-12 boost-hidden">
+	<div class="boost-pfs-search-result-pages">
+		<div class="boost-pfs-search-result-list-item"><a href="#">{% include 'boost-pfs-filter-skeleton', width: 4 %}</a></div>
+		<div class="boost-pfs-search-result-list-item"><a href="#">{% include 'boost-pfs-filter-skeleton', width: 3 %}</a></div>
+		<div class="boost-pfs-search-result-list-item"><a href="#">{% include 'boost-pfs-filter-skeleton', width: 4 %}</a></div>
+	</div>
+	<div class="boost-pfs-filter-pagination-wrapper desktop-12 tablet-6 mobile-3"><div class="boost-pfs-search-result-page-pagination">{% include 'boost-pfs-filter-skeleton', width: 4 %}</div></div>
+</div>
+
+<script>
+	// Declare boostPFSThemeConfig variable
+	var boostPFSThemeConfig = {
+		label: {
+			sorting: {% assign temp = 'collections.sorting.title' | t  %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Sorting" {% endunless %},
+			sorting_best_selling: {% assign temp = 'collections.sorting.best_selling' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Best Selling" {% endunless %},
+			sorting_featured: {% assign temp = 'collections.sorting.featured' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Featured" {% endunless %},
+			sorting_title_ascending: {% assign temp = 'collections.sorting.az' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Alphabetically, A-Z" {% endunless %},
+			sorting_title_descending: {% assign temp = 'collections.sorting.za' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Alphabetically, Z-A" {% endunless %},
+			sorting_price_ascending: {% assign temp = 'collections.sorting.price_ascending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Lowest Price" {% endunless %},
+			sorting_price_descending: {% assign temp = 'collections.sorting.price_descending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Highest Price" {% endunless %},
+			sorting_date_ascending: {% assign temp = 'collections.sorting.date_ascending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Date, Old to New" {% endunless %},
+			sorting_date_descending: {% assign temp = 'collections.sorting.date_descending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Date, New to Old" {% endunless %},
+			sorting_sale_descending: {% assign temp = 'collections.sorting.sale_descending' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "% Off" {% endunless %},
+			sorting_relevance: {% assign temp = 'collections.sorting.relevance' | t %} {% unless temp contains 'translation missing'  %} {{temp | json}} {% else %} "Relevance" {% endunless %},
+			search_result_header: {{ 'general.search.results_for_html' | t | json }},
+			search_result_empty: {{ 'general.search.no_results_html' | t | json }},
+
+			sale: {{ 'products.general.sale' | t | json }},
+			sold_out: {{ 'products.general.sold' | t | json }},
+			new: {{ 'products.general.new' | t | json }},
+			quick_view: {{ 'products.general.quick_view' | t | json }},
+			from_price: {{ 'products.general.from' | t | json }},
+			showing_items: {{ 'general.pagination.showing_items' | t | json }},
+			pagination_of: {{ 'general.pagination.of' | t | json }},
+		},
+		custom: {
+			products_per_page:  24,
+			products_per_row: 4,
+			vendor_enable: {% if settings.vendor %} {{ settings.vendor | json }} {% else %} false {% endif %},
+			quick_view_enable: {% if settings.quickview %} {{ settings.quickview | json }} {% else %} false {% endif %},
+			secondary_images_hover: {% if settings.secondary_images_hover %} {{ settings.secondary_images_hover | json }} {% else %} "no_hover_effect" {% endif %},
+			product1_url: {{ 'product-1' | placeholder_svg_tag | json }}
+		},
+	};
+</script>

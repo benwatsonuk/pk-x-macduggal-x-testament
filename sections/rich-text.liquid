@@ -1,0 +1,153 @@
+<section class="index-section rich__text-section--{{ section.id }}" data-section-id="{{ section.id }}" >
+  <div class="row">
+    <div class="rich__text-container desktop-12 tablet-6 mobile-3 padded">
+      <div class="rich__text-content">
+        {% for block in section.blocks %}
+          <div class="rich__text-column{% if block.settings.center %} center{% endif %} block-{{ block.id }}">
+            {% if block.settings.title != blank %}
+              <h3>{{ block.settings.title | escape }}</h3>
+              <div class="clear"></div>
+            {% endif %}
+            {% if block.settings.page != blank %}
+            {%- assign feat_page = pages[block.settings.page] -%}
+            {{ feat_page.content }}
+            {% else %}
+            <div class="rte">
+            {{ block.settings.text }}
+            </div>
+            {% endif %}
+            {% if block.settings.page == blank and block.settings.text == blank %}
+            <div class="content-onboard">
+              <p>Use this section to tell customers about your store or add content from one of your pages which makes it easy to add images, video or any other content</p>
+            </div>
+            {% endif %}
+            {% assign width = block.settings.block_width %}
+            {% case block.settings.block_width %}
+            {% when 25 %}
+            {% assign span = 'span_1' %}
+            {% when 50 %}
+            {% assign span = 'span_2' %}
+            {% when 75 %}
+            {% assign span = 'span_3' %}
+            {% when 100 %}
+            {% assign span = 'span_4' %}
+            {% endcase %}
+            <style>
+              .rich__text-column.block-{{ block.id }} {
+                {% if section.blocks.size == 1 %}
+                width: {{ width }}%;
+                justify-self: center;
+                {% else %}
+                grid-column: auto / {{ span | replace: '_', ' ' }};
+                {% endif %}
+              }
+            </style>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <style>
+    {% if section.blocks.size > 1 %}
+    .rich__text-content {
+      grid-template-columns:repeat(4, 1fr);
+      justify-content: center;
+    }
+    {% endif %}
+    .rich__text-section--{{ section.id }} {
+      padding: {{ section.settings.padding }}px 0;
+    }
+    .rich__text-section--{{ section.id }} {
+      background: {{ section.settings.background_color }};
+    }
+    .rich__text-section--{{ section.id }} h3,
+    .rich__text-section--{{ section.id }} p,
+    .rich__text-section--{{ section.id }} a {
+      color: {{ section.settings.text_color }};
+    }
+  </style>
+</section>
+
+
+{% schema %}
+{
+  "name": "Rich text",
+  "max_blocks": 4,
+  "settings": [
+    {
+      "type":      "range",
+      "id":        "padding",
+      "min":       30,
+      "max":       100,
+      "step":      10,
+      "unit":      "px",
+      "label":     "Section padding",
+      "default":   60
+    },
+    {
+      "type":"color",
+      "id":"text_color",
+      "label":"Text color",
+      "default":"#000000"
+    },
+    {
+      "type":"color",
+      "id":"background_color",
+      "label":"Background",
+      "default":"#ffffff"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "text_block",
+      "name": "Column",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default": "Welcome"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text",
+          "default": "<p>Add some text blocks to your page with editable widths for a single or multi-column display</p>"
+        },
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Show content from a page",
+          "info":"Overrides any text entered"
+        },
+        {
+          "type": "checkbox",
+          "id": "center",
+          "label": "Center align"
+        },
+        {
+         "type":    "range",
+         "id":      "block_width",
+         "min":     25,
+         "max":     100,
+         "step":    25,
+         "unit":    "%",
+         "label":   "Block width",
+         "default": 100
+        }
+      ]
+    }
+  ],
+  "presets":[
+    {
+     "name":"Rich text",
+     "category":"Text",
+     "blocks": [
+        {
+         "type": "text_block"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

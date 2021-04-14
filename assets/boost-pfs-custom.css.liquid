@@ -1,0 +1,73 @@
+/*********************** Custom CSS for Boost Filter & Search  ************************/
+{% assign breakpointMobile = '767px' %}
+{% assign breakpointDesktop = '768px' %}
+{% assign searchBoxMobileHeight = '64px' %}
+
+/**************************** Place your custom css below  ****************************/
+#sidebar ul {
+	margin: 0;
+}
+
+#product-loop {
+	overflow: hidden;
+}
+
+.boost-pfs-filter-tree-mobile button {
+	height: auto;
+}
+
+.boost-pfs-filter-top-pagination a, .boost-pfs-filter-top-pagination span {
+	padding: 0 5px;
+}
+
+@media screen and (max-width: {{breakpointMobile}}) {
+	.boost-pfs-filter-tree:not(.boost-pfs-filter-tree-mobile-open) {
+		text-align: left;
+	}
+}
+.shopify-payment-button__button--hidden {
+	visibility: hidden;
+}
+
+#pagination span.current, span.current {
+	font-weight: 700;
+}
+
+.boost-pfs-filter-tree-open-body header {
+	z-index: 0;
+}
+
+.boost-pfs-search-result-toolbar, .boost-pfs-search-result-wrap {
+	clear: both;
+}
+
+ul.boost-pfs-search-result-panel-controls > li button {
+	color: inherit;
+	margin-bottom: 0;
+}
+
+.boost-pfs-filter-pagination-wrapper {
+	text-align: center;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	line-height: 38px;
+}
+
+.boost-pfs-filter-pagination-wrapper a,
+.boost-pfs-filter-pagination-wrapper span {
+	float: none;
+	display: inline-block;
+	padding: 0 5px;
+}
+
+.boost-pfs-filter-pagination-wrapper span.current {
+	font-weight: 700;
+}
+
+.boost-pfs-search-result-toolbar {
+	margin-top: 0;
+}
+
+#search-bar {
+	border-bottom: none;
+}

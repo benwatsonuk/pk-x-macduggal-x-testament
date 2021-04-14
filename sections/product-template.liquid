@@ -1,0 +1,381 @@
+{% assign current_variant = product.selected_or_first_available_variant %}
+<section id="product-{{ product.id }}" class="row product__section" data-product-id="{{ product.id }}" data-section-id="{{ section.id }}" data-section-type="product__section" data-initial-variant="{{ current_variant.featured_media.id }}">
+
+  {% if settings.breadcrumb %}
+    {% render 'breadcrumb' %}
+  {% endif %}
+
+  {% render 'product-json', product: product %}
+
+  {% assign thumbnail_position = section.settings.thumbnail_position %}
+  {% assign click_to_enlarge = section.settings.click_to_enlarge %}
+  {% assign enable_video_looping = section.settings.enable_video_looping %}
+  {% capture product_gallery_config %}{
+    "thumbPosition": {{ section.settings.thumbnail_position | json }},
+    "enableVideoLooping": {{ section.settings.enable_video_looping | json }},
+    "mainSlider": {% if product.media.size <= 1 %}false{% else %}true{% endif %},
+    "thumbSlider": {% if product.media.size >= 4 %}true{% else %}false{% endif %},
+    "productId": {{ product.id | json }},
+    "thumbsShown": 4,
+    "clickToEnlarge": {{ click_to_enlarge | json }},
+    "isQuick": false
+ }{% endcapture %}
+
+  <div class="product__section-container">
+    <div class="product__section-images carousel-container js-product-gallery"
+      data-product-gallery data-product-single-media-group data-gallery-config='{{ product_gallery_config }}'>
+      {%- if product.featured_media -%}
+        {% render 'product-image-gallery',
+          product: product,
+          thumbnail_position: thumbnail_position,
+          click_to_enlarge: click_to_enlarge,
+          enable_video_looping: enable_video_looping %}
+      {%- else -%}
+        {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+        {{ 'product-' | append: current | placeholder_svg_tag: 'placeholder-svg' }}
+      {%- endif -%}
+    </div>
+    <div class="product__section-contentWrapper">
+      <div class="product__section-content">
+        <div class="product__section-details">
+          {% if settings.vendor %}
+            <h3>{{ product.vendor }}</h3>
+          {% endif %}
+          <h1 class="product__section-title product-title">{{ product.title }}</h1>
+          {% capture product_form_config %}
+            { "money_format": {{ shop.money_format | json }},
+              "enable_history": true,
+              "sold_out": {{ "products.product.sold_out" | t | json }},
+              "button": {{ 'products.product.add_to_cart' | t | json }},
+              "unavailable": {{ 'products.product.unavailable' | t | json }},
+              "quickview": false
+            }
+          {% endcapture %}
+          {% render 'product-form',
+             product_form_config: product_form_config,
+             product: product,
+             current_variant: current_variant,
+             show_sku: settings.show_sku %}
+          <div class="product-single__store-availability-container" data-store-availability-container></div>
+
+          {% capture description %}
+              <div class="rte">
+                <div class="rte-description">
+                  {{ product.description }}
+                </div>
+                 {% assign unique_id = section.id %}
+
+                 <div class="js-accordion c-accordion c-accordion--product c-accordion--{{ unique_id }}" id="c-accordion--{{ unique_id }}" {% if section.settings.allow_multiple %}data-accordion-allow-multiple{% endif %}>
+
+                  {% for block in section.blocks %}
+
+                    {% assign accordion_content_class = 'c-accordion__panel--' %}
+                    {% assign accordion_content_id = accordion_content_class | append: unique_id | append: '-' | append: forloop.index %}
+
+                    {% assign accordion_heading = 'foo' %}
+                    {% assign accordion_content = 'bar' %}
+                    {% assign page = blank %}
+                    {% assign defaultOpen = block.settings.default_open_accordion %}
+
+                    {% if block.type == 'product_description' %}
+                      {% assign accordion_heading = 'products.product.details' | t %}
+                      {% assign accordion_content = product.description %}
+                      <style>
+                        .rte-description { display: none; }
+                      </style>
+                    {% elsif block.type == 'accordion_content' %}
+                      {% assign page = pages[block.settings.page] %}
+                      {% assign accordion_heading = block.settings.title %}
+                      {% if block.settings.page != blank %}
+                        {% assign accordion_content = page.content %}
+                      {% else %}
+                        {% assign accordion_content = block.settings.text %}
+                      {% endif %}
+                    {% endif %}
+
+                    <button class="js-accordion-header c-accordion__header {% if defaultOpen %}js-accordion-is-open{% endif %}"
+                            {% if defaultOpen %}
+                              aria-expanded="true"
+                            {% else %}
+                              aria -expanded="false"
+                            {% endif %}
+                            aria-controls="{{ accordion_content_id }}" data-toggle="accordion"
+                            {{ block.shopify_attributes }} >
+                      {{ accordion_heading }}
+                        <span class="dropdown-arrow">
+                          <i class="fa fa-angle-down"></i>
+                        </span>
+                    </button>
+                     <div class="c-accordion__panel {% if defaultOpen %}is-active{% endif %} {{ accordion_content_id }} rte" id="{{ accordion_content_id }}" data-parent="#c-accordion--{{ unique_id }}">
+                      <div class="c-accordion__inner">
+                       {{ accordion_content }}
+                      </div>
+                     </div>
+
+                  {% endfor %}
+
+
+                 </div><!-- /.c-accordion.c-accordion--product -->
+              </div>
+              {% endcapture %}
+
+          {% if section.settings.product_description == 'right' %}
+            {{ description }}
+          {% endif %}
+          <div class="clear">
+          </div>
+          {%- if section.settings.show_social -%}
+            {% render 'social' with product %}
+          {%- endif -%}
+          {% if section.settings.show_contact_link %}
+          <span class="popup_content_link">
+            <button class="product__contact-trigger button-as-link js-modal-open js-contact-trigger" type="button" name="button" data-wau-modal-target="contact-form" >{{ 'products.product.popup_question' | t }}</button>
+          {% endif %}
+          {% if section.settings.show_contact_link %}
+          <div data-wau-modal-content="contact-form" style="display: none">{% render 'question' %}</div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if section.settings.product_description == 'bottom' %}
+    <div class="clear"></div>
+    <div class="product__section-lowerDescription desktop-8 desktop-push-2 tablet-6 mobile-3">
+      <div class="section-title {% if settings.section_titles == 'lines' %}lines {% elsif settings.section_titles == 'btm_border' %}btm_border {% endif %}"><h3>{{ 'products.product.details' | t }}</h3></div>
+        {{ description }}
+    </div>
+  {% endif %}
+  <div class="clear"></div>
+  <style>
+    .product__section-content {
+      background: {{ section.settings.product_form_background }};
+      padding: 20px;
+      border: 7px double {{ section.settings.product_page_border }};
+    }
+    {% if section.settings.thumbnail_position == 'hidden' %}
+    #thumbnails { display: none; }
+    {% endif %}
+    {% if section.settings.thumbnail_position == 'bottom' %}
+      #product-{{ product.id }} .thumb-slider-slides {
+        transition: left 0.5s ease-in-out;
+      }
+    {% else %}
+      #product-{{ product.id }} .thumb-slider-slides {
+        transition: top 0.5s ease-in-out;
+      }
+    {% endif %}
+    {% if thumbnail_position == 'left' %}
+      .product-main-images {
+        float: right !important;
+      }
+    {% endif %}
+    @media screen and ( min-width: 741px ) {
+      {% if section.settings.form_left %}
+        .product__section-details, .product__section-details .rte, .product__section-details h1 { text-align: left; }
+        .add { margin: 0; }
+        .price { align-items: flex-start; }
+      {% endif %}
+    }
+    {%- if section.settings.form_left -%}
+      .store-availability-information {
+        justify-content: start !important;
+      }
+      .store-availability-information-container,
+      .store-availability-information__stores,
+      .slideout__trigger-store-availability {
+        text-align: left !important;
+      }
+    {%- else -%}
+      .store-availability-information {
+        justify-content: center !important;
+      }
+      .store-availability-information-container,
+      .store-availability-information__stores,
+      .slideout__trigger-store-availability {
+        text-align: center !important;
+      }
+    {%- endif -%}
+    @media screen and ( max-width: 740px ) {
+      .store-availability-information {
+        justify-content: center !important;
+      }
+      .store-availability-information-container,
+      .store-availability-information__stores,
+      .slideout__trigger-store-availability {
+        text-align: center !important;
+      }
+    }
+  </style>
+</section>
+
+<script type="application/json" id="ModelJson-{{ section.id }}">
+  {{ product.media | where: 'media_type', 'model' | json }}
+</script>
+<script type="application/json" id="ProductJson-{{ section.id }}">
+  {{ product | json }}
+</script>
+{% schema %}
+  {
+    "name": "Product page",
+    "settings": [
+    {
+      "type": "header",
+      "content": "Product Form Settings"
+    },
+    {
+      "type": "color",
+      "id": "product_form_background",
+      "label": "Product form background",
+      "default": "#fff"
+    },
+    {
+      "type": "color",
+      "id": "product_page_border",
+      "label": "Product form border",
+      "default": "#fff"
+    },
+    {
+      "type": "checkbox",
+      "id": "form_left",
+      "label": "Left align product details",
+      "default": true,
+      "info": "Centered on mobile"
+    },
+    {
+      "type": "header",
+      "content": "Media"
+    },
+    {
+      "type": "select",
+      "id": "thumbnail_position",
+      "label": "Thumbnail position",
+      "options": [
+          {
+            "value": "right",
+            "label": "Right"
+          },
+          {
+            "value": "left",
+            "label": "Left"
+          },
+          {
+            "value": "bottom",
+            "label": "Bottom"
+          },
+          {
+            "value": "hidden",
+            "label": "Hidden"
+          }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "click_to_enlarge",
+        "label": "Enable click to enlarge",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_video_looping",
+        "label": "Enable video looping",
+        "default": false
+      },
+      {
+        "type": "paragraph",
+        "content": "Learn more about [Media types](https:\/\/help.shopify.com/en\/manual\/products\/product-media\)"
+      },
+      {
+        "type": "header",
+        "content": "Product Content"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_social",
+        "label": "Show social share icons",
+        "default": true
+      },
+      {
+        "type": "checkbox",
+        "id": "show_contact_link",
+        "label": "Show contact form link",
+        "info":"Show a contact form within a popup window allowing customers to ask product specific questions",
+        "default": true
+      },
+      {
+        "type": "select",
+        "id": "product_description",
+        "label": "Description position",
+        "options": [
+          {
+            "value": "right",
+            "label": "Right Side"
+          },
+          {
+            "value": "bottom",
+            "label": "Below Images and Product Options"
+          }
+        ]
+      },
+      {
+        "type": "checkbox",
+        "id": "allow_multiple",
+        "label": "Allow multiple accordions open at one time",
+        "default": false
+      }
+    ],
+    "blocks":[
+    {
+      "type": "accordion_content",
+      "name": "Accordion content",
+      "limit": 5,
+      "settings": [
+        {
+          "type": "page",
+          "id": "page",
+          "label": "Page content",
+          "info":"Add content from a page which will be shown on all product pages"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Heading",
+          "default":"Item heading"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Text content",
+          "default":"<p>Add some text content to your accordion which will show if a page is not selected</p>",
+          "info": "Or enter your own content which will be shown on all product pages"
+        },
+        {
+          "type": "checkbox",
+          "id": "default_open_accordion",
+          "label": "Have accordion item open",
+          "info":"Accordion item is open by default when the page loads",
+          "default": false
+        }
+      ]
+    },
+    {
+      "type": "product_description",
+      "name": "Product description",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content":"Adds the product description to your accordion, removing this block will simply take the description out of the accordion. It will however remain visible on the page."
+        },
+        {
+          "type": "checkbox",
+          "id": "default_open_accordion",
+          "label": "Have accordion item open",
+          "info":"Accordion item is open by default when the page loads",
+          "default": false
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

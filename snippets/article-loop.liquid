@@ -1,0 +1,51 @@
+<div class="article-index blog__post-container" id="article-{{ article.id }}" data-alpha="{{ article.title }}">
+  <div class="blog__post-content">
+    {% if article.image %}
+    <div class="blog__post-image image_landscape">
+      <a href="{{ article.url }}" title="{{ article.title }}">
+        {% render 'basic-responsive-image', type: article.image, data_widths: '[180, 360, 540, 720, 900, 1080]' %}
+        <noscript>
+          <img src="{{ article.image | img_url: '800x' }}" alt="{{ article.image.alt }}">
+        </noscript>
+      </a>
+    </div>
+    {% endif %}
+      <div class="blog__post-details">
+        <div class="blog__post-title">
+          <h3><a href="{{ article.url }}">{{ article.title }}</a></h3>
+        </div>
+        {% if section.settings.show_author %}
+          <span class="blog__post-author posted">{{ article.author }}</span>
+        {% endif %}
+        {% if section.settings.show_date %}
+        {% assign published_at = article.published_at | date: format: 'month_date_year' %}
+          <span class="blog__post-date posted">{{ 'blogs.article.posted_on_date_html' | t: date: published_at }}</span>
+        {% endif %}
+        <div class="blog__post-excerpt">
+          <div class="rte">
+          {% if article.excerpt == blank %}
+            {{ article.content | strip_html | truncate: 90 }}
+          {% else %}
+            {{ article.excerpt }}
+          {% endif %}
+          </div>
+          {% if article.tags.size > 0 and section.settings.show_tags %}
+          <ul class="blog__post-tags">
+            {% for tag in article.tags %}
+            <li class="blog__post-tag">
+              <a href="{{ blog.url }}/tagged/{{ tag | handle }}">
+                {{ tag }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% if section.settings.show_button %}
+          <div class="blog__post-button readmore">
+            <a href="{{ article.url }}">{{ 'blogs.article.read_more' | t }}</a>
+          </div>
+          {% endif %}
+        </div>
+    </div>
+  </div>
+</div>

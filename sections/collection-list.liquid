@@ -1,0 +1,131 @@
+<section class="index-section collection__list-section" data-section-id="{{ section.id }}" >
+  <div class="collection__list-container row">
+    {% if section.settings.title != blank %}
+    <div class="section-title {% if settings.section_titles == 'lines' %}lines {% elsif settings.section_titles == 'btm_border' %}btm_border {% endif %} desktop-12 tablet-6 mobile-3"><h2>{{ section.settings.title | escape }}</h2></div>
+    {% endif %}
+
+    <div class="collection__list-loop">
+	    {% for block in section.blocks limit: section.blocks.size %}
+      {%- assign collection = collections[block.settings.collection] -%}
+      {% if section.settings.title_position == 'floating' %}{% assign is_floating = true %}{% endif %}
+      <div class="collection__list-item{% if is_floating %} floating__title{% endif %}" data-alpha="{{ collection.title }}" {{ block.shopify_attributes }}>
+        {% if block.settings.collection == blank %}
+        {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+        {%- assign placeholder = 'collection-' | append: current -%}
+          <div class="collection__item-image ci onboard">
+            <a href="#">
+              {{ placeholder | placeholder_svg_tag: 'placeholder-svg' }}
+            </a>
+          </div>
+        <div class="collection__item-details">
+          <a href="{{ collection.url }}" title="{{ collection.title }}">
+            <p><a href="#">Sample collection {{ forloop.index }}</a></p>
+          </a>
+        </div>
+        {% else %}
+          {% render 'collection-grid-item', collection: collection %}
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if section.blocks.size == 0 %}
+      {% render 'no-blocks' %}
+    {% endif %}
+  </div>
+
+  {%- assign grid = section.settings.grid -%}
+  {% case section.settings.grid %}
+  {% when 2 %}
+  {%- assign prod_grid = 50 -%}
+  {% when 3 %}
+  {%- assign prod_grid = 33.333 -%}
+  {% when 4 %}
+  {%- assign prod_grid = 25 -%}
+  {% endcase %}
+
+  <style>
+    .collection__list-loop {
+      grid-template-columns: repeat({{ grid }}, 1fr);
+    }
+  </style>
+
+</section>
+<div class="clear"></div>
+
+{% schema %}
+{
+  "name": "Collection list",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Collection list"
+    },
+    {
+      "type":      "range",
+      "id":        "grid",
+      "min":       2,
+      "max":       4,
+      "step":      1,
+      "label":     "Collections per row",
+      "default":   3
+    },
+    {
+      "type": "select",
+      "id": "title_position",
+      "label": "Collection title position",
+      "options": [
+        {
+          "value": "below",
+          "label": "Below image"
+        },
+        {
+          "value": "floating",
+          "label": "Floating on image"
+        }
+      ]
+    },
+    {
+      "type": "checkbox",
+      "id": "collection_count",
+      "label": "Show product count"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "featured_collection",
+      "name": "Collection",
+      "settings": [
+        {
+          "label": "Collection",
+          "id": "collection",
+          "type": "collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection list",
+      "category": "Collection",
+      "settings": {
+        "grid": 3
+      },
+      "blocks": [
+        {
+          "type": "featured_collection"
+        },
+        {
+          "type": "featured_collection"
+        },
+        {
+          "type": "featured_collection"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

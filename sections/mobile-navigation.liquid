@@ -1,0 +1,361 @@
+<nav class="mobile-menu" role="navigation" data-section-id="{{ section.id }}" data-section-type="mobile-navigation">
+  <div class="slideout__trigger--close">
+    <button class="slideout__trigger-mobile-menu js-slideout-close" data-slideout-direction="left" aria-label="Close navigation" tabindex="0" type="button" name="button">
+      <div class="icn-close"></div>
+    </button>
+  </div>
+  {% for block in section.blocks %}
+    {% case block.type %}
+      {% when 'search_box' %}
+        <div class="mobile-menu__block mobile-menu__search" {{ block.shopify_attributes }}>
+          <form action="/search" method="get">
+            <input type="text" name="q" id="q" placeholder="{{ 'general.search.placeholder' | t }}" />
+            {% if settings.search_products %}
+              <input type="hidden" name="type" value="product">
+            {% endif %}
+          </form>
+        </div>
+      {% when 'navigation' %}
+
+        {% assign unique_id = block.id | slice: 0, 7 %}
+        {% assign mobile_menu_allow_multiple = false %}
+
+        <ul class="js-accordion js-accordion-mobile-nav c-accordion c-accordion--mobile-nav c-accordion--{{unique_id}}"
+            id="c-accordion--{{unique_id}}"
+            {% if mobile_menu_allow_multiple %}
+
+            data-accordion-allow-multiple
+            {% endif %}
+
+             {{ block.shopify_attributes }}>
+
+          {% assign menu = linklists[block.settings.main_nav] %}
+
+          {% for link in menu.links %}
+
+            {% assign level_one_nested_link_count = 0 %}
+
+            {% if link.links != blank %}
+
+              {% assign level_one_nested_link_count = level_one_nested_link_count | plus: 1 %}
+
+              {% assign level_one_link_index = forloop.index %}
+              {% assign accordion_content_id = 'c-accordion__panel--' | append: unique_id | append: '-' | append: level_one_link_index %}
+
+              <li class="js-accordion-header c-accordion__header">
+                <a class="js-accordion-link c-accordion__link" href="{{ link.url }}">{{ link.title | escape }}</a>
+                <button class="dropdown-arrow" aria-label="{{  link.title | escape }}" data-toggle="accordion" aria-expanded="false" aria-controls="{{ accordion_content_id }}" >
+                  <i class="fa fa-angle-down"></i>
+                </button>
+              </li>
+
+              <li class="c-accordion__panel {{ accordion_content_id }}" id="{{ accordion_content_id }}" data-parent="#c-accordion--{{ unique_id }}">
+
+                {% assign level_two_unique_id = unique_id | append: '-' | append: level_one_nested_link_count %}
+
+                <ul class="js-accordion js-accordion-mobile-nav c-accordion c-accordion--mobile-nav c-accordion--mobile-nav__inner c-accordion--{{ level_two_unique_id }}" id="c-accordion--{{ level_two_unique_id }}">
+
+                  {% for sub_link in link.links %}
+                    {% if sub_link.links != blank %}
+
+                        {% assign level_two_link_index = forloop.index %}
+                        {% assign level_two_accordion_content_id = 'c-accordion__panel--' | append: unique_id | append: '-' | append: level_one_link_index | append: '-' | append: level_two_link_index %}
+
+                        <li class="js-accordion-header c-accordion__header">
+                          <a class="js-accordion-link c-accordion__link" href="{{ sub_link.url }}">{{ sub_link.title | escape }}</a>
+                          <button class="dropdown-arrow" aria-label="{{  sub_link.title | escape }}" data-toggle="accordion" aria-expanded="false" aria-controls="{{ level_two_accordion_content_id }}" >
+                            <i class="fa fa-angle-down"></i>
+                          </button>
+                        </li>
+
+                        <li class="c-accordion__panel {{ level_two_accordion_content_id }}" id="{{ level_two_accordion_content_id }}" data-parent="#c-accordion--{{ level_two_unique_id }}">
+                          <ul>
+                            {% for sub_sub_link in sub_link.links %}
+
+                              <li>
+                                <a class="js-accordion-link c-accordion__link" href="{{ sub_sub_link.url }}">{{ sub_sub_link.title }}</a>
+                              </li>
+
+                            {% endfor %}
+                          </ul>
+                        </li>
+                    {% else %}
+                    <li>
+                      <a class="js-accordion-link c-accordion__link" href="{{ sub_link.url }}">{{ sub_link.title | escape }}</a>
+                    </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </li>
+            {% else %}
+            <li>
+              <a class="js-accordion-link c-accordion__link" href="{{ link.url }}">{{ link.title | escape }}</a>
+            </li>
+            {% endif %}
+          {% endfor %}
+          {% if shop.customer_accounts_enabled and block.settings.customer_account_links %}
+            {% if customer  %}
+              <li class="mobile-menu__item">
+                <a href="{{ routes.account_url }}">
+                  <i class="fa fa-user" aria-hidden="true"></i>&nbsp;&nbsp;{{ 'layout.mobile_nav.account' | t }}
+                </a>&nbsp;&nbsp;<i class="fa fa-user-times" aria-hidden="true"></i>&nbsp;&nbsp;{{ 'layout.mobile_nav.logout' | t }}
+              </li>
+            {% else %}
+              <li class="mobile-menu__item"><i class="fa fa-user" aria-hidden="true"></i>&nbsp;&nbsp;<a href="{{ routes.account_login_url }}">{{ 'layout.mobile_nav.login' | t }}</a></li>
+            {% endif %}
+          {% endif %}
+        </ul><!-- /.c-accordion.c-accordion--mobile-nav -->
+      {% when 'social_icons' %}
+        <div class="mobile-menu__block mobile-menu__social text-center" {{ block.shopify_attributes }}>
+          {% render 'social-icons' %}
+          <style>
+            .mobile-menu__social i {
+              color: {{ block.settings.icon_color }};
+            }
+            .mobile-menu__social i:hover {
+              color: {{ block.settings.icon_hover_color }};
+            }
+          </style>
+        </div>
+      {% when 'featured_image' %}
+        <div class="mobile-menu__block mobile-menu__featured-image{% if block.settings.full_featured_image %} mobile-menu__featured-image--full-width{% endif %}" {{ block.shopify_attributes }}>
+          {% if block.settings.featured_image_link %}<a href="{{ block.settings.featured_image_link }}">{% endif %}
+            {% render 'basic-responsive-image' type: block.settings.featured_image %}
+            <noscript>
+              <img src="{{ block.settings.featured_image | img_url: '300x' }}" alt="block.settings.featured_image.alt">
+            </noscript>
+          {% if block.settings.featured_image_link %}</a>{% endif %}
+        </div>
+      {% when 'featured_text' %}
+        <div class="mobile-menu__block mobile-menu__featured-text text-center" {{ block.shopify_attributes }}>
+          {{ block.settings.featured_text }}
+        </div>
+      {% when 'cart_status' %}
+        <div class="mobile-menu__block mobile-menu__cart-status" {{ block.shopify_attributes }}>
+          <a class="mobile-menu__cart-icon" href="{{ routes.cart_url }}">
+            {{ 'cart.general.title' | t }}
+            <span class="mobile-menu__cart-count js-cart-count">{{ cart.item_count }}</span>
+
+            {% if block.settings.cart_icon == 'bag' %}
+              <i class="fa fa-shopping-bag" aria-hidden="true"></i>
+            {% else %}
+              <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+            {% endif %}
+          </a>
+        </div>
+    {% endcase %}
+  {% endfor %}
+  <style>
+    .mobile-menu {
+      background: {{ section.settings.background_color }};
+      height: 100vh;
+    }
+    .slideout__drawer-left,
+    .mobile-menu__search input {
+      background: {{ section.settings.background_color }};
+    }
+    .mobile-menu .mobile-menu__item,
+    .mobile-menu .accordion__toggle,
+    .mobile-menu .accordion__toggle-2 {
+      border-bottom: 1px solid {{ section.settings.border_color }};
+    }
+    .mobile-menu__search form input,
+    .mobile-menu__cart-icon,
+    .mobile-menu__accordion > .mobile-menu__item:first-child {
+      border-color: {{ section.settings.border_color }};
+    }
+    .mobile-menu .mobile-menu__item a,
+    .mobile-menu .accordion__toggle a,
+    .mobile-menu .accordion__toggle-2 a,
+    .mobile-menu .accordion__submenu-2 a,
+    .mobile-menu .accordion__submenu-1 a,
+    .mobile-menu__cart-status a,
+    .accordion__toggle-2:after,
+    .accordion__toggle:after,
+    .mobile-menu .mobile-menu__item i,
+    .mobile-menu__featured-text p,
+    .mobile-menu__search input,
+    .mobile-menu__search input:focus {
+      color: {{ section.settings.link_color }};
+    }
+    .mobile-menu__search ::-webkit-input-placeholder { /* WebKit browsers */
+      color: {{ section.settings.link_color }};
+    }
+    .mobile-menu__search :-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+      color: {{ section.settings.link_color }};
+    }
+    .mobile-menu__search ::-moz-placeholder { /* Mozilla Firefox 19+ */
+      color: {{ section.settings.link_color }};
+    }
+    .mobile-menu__search :-ms-input-placeholder { /* Internet Explorer 10+ */
+      color: {{ section.settings.link_color }};
+    }
+    .mobile-menu .accordion__toggle-2 a,
+    .mobile-menu .accordion__submenu-2 a,
+    .mobile-menu .accordion__submenu-1 a,
+    .accordion__toggle-2:after {
+     opacity: 0.9;
+    }
+    .mobile-menu .slideout__trigger-mobile-menu .icn-close:after,
+    .mobile-menu .slideout__trigger-mobile-menu .icn-close:before {
+      border-color: {{ section.settings.link_color }} !important;
+    }
+    .accordion__toggle:after,
+    .accordion__toggle-2:after { border-left: 1px solid {{ section.settings.border_color }}; }
+
+    .c-accordion.c-accordion--mobile-nav a,
+    .c-accordion.c-accordion--mobile-nav .dropdown-arrow {
+      color: {{ section.settings.link_color }};
+    }
+    .c-accordion.c-accordion--mobile-nav li:not(.c-accordion__panel),
+    .c-accordion.c-accordion--mobile-nav .dropdown-arrow {
+      border-color: {{ section.settings.border_color }};
+    }
+  </style>
+</nav>
+
+{% schema %}
+{
+    "name": "Mobile navigation",
+    "settings": [
+      {
+        "type": "color",
+        "id": "background_color",
+        "label": "Background color",
+        "default": "#ffffff"
+      },
+      {
+        "type": "color",
+        "id": "link_color",
+        "label": "Link color",
+        "default": "#000000"
+      },
+      {
+        "type": "color",
+        "id": "border_color",
+        "label": "Border color",
+        "default": "#000000"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "search_box",
+        "name": "Search Box",
+        "settings": []
+      },
+      {
+        "type": "navigation",
+        "name": "Navigation",
+        "settings": [
+          {
+            "type": "link_list",
+            "id": "main_nav",
+            "label": "Choose main menu",
+            "default":"main-menu"
+          },
+          {
+            "type": "checkbox",
+            "id": "customer_account_links",
+            "label": "Show customer account links",
+            "info": "Customer accounts must be enabled to see."
+          }
+        ]
+      },
+      {
+        "type": "featured_image",
+        "name": "Featured Image",
+        "settings": [
+          {
+            "type": "image_picker",
+            "id": "featured_image",
+            "label": "Choose featured image",
+            "info": "400px x 300px recommended"
+          },
+          {
+            "type": "url",
+            "id": "featured_image_link",
+            "label": "Featured image link"
+          },
+          {
+            "type": "checkbox",
+            "id": "full_featured_image",
+            "label": "Enable full-width image",
+            "default": false
+          }
+        ]
+      },
+      {
+        "type": "social_icons",
+        "name": "Social Icons",
+        "settings": [
+          {
+            "type": "color",
+            "id": "icon_color",
+            "label": "Icon color"
+          },
+          {
+            "type": "color",
+            "id": "icon_hover_color",
+            "label": "Icon hover color"
+          }
+        ]
+      },
+      {
+        "type": "featured_text",
+        "name": "Featured Text",
+        "settings": [
+          {
+            "type": "richtext",
+            "id": "featured_text",
+            "label": "Featured Text",
+            "default": "<p><b>Featured Text</b></p><p><em>A great place to share about a sale!</em></p>"
+          }
+        ]
+      },
+      {
+        "type": "cart_status",
+        "name": "Cart Link",
+        "settings": [
+          {
+            "type": "select",
+            "id": "cart_icon",
+            "label": "Cart icon",
+            "options": [
+              {
+                "value": "cart",
+                "label": "Cart"
+              },
+              {
+                "value": "bag",
+                "label": "Bag"
+              }
+            ],
+            "info":"You can change the text in your edit language section"
+          }
+        ]
+      }
+    ],
+    "default": {
+      "blocks": [
+        {
+          "type": "featured_image"
+        },
+        {
+          "type": "cart_status"
+        },
+        {
+          "type": "navigation"
+        },
+        {
+          "type": "featured_text"
+        },
+        {
+          "type": "search_box"
+        },
+        {
+          "type": "social_icons"
+        }
+      ]
+    }
+  }
+{% endschema %}
